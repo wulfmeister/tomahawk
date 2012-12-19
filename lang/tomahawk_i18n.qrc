@@ -1,15 +1,19 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/lang">
-<file>tomahawk_en.qm</file>
+<file>tomahawk_ar.qm</file>
 <file>tomahawk_bg.qm</file>
+<file>tomahawk_ca.qm</file>
 <file>tomahawk_de.qm</file>
+<file>tomahawk_en.qm</file>
+<file>tomahawk_es.qm</file>
 <file>tomahawk_fr.qm</file>
+<file>tomahawk_ja.qm</file>
 <file>tomahawk_pl.qm</file>
 <file>tomahawk_pt_BR.qm</file>
 <file>tomahawk_ru.qm</file>
-<file>tomahawk_es.qm</file>
 <file>tomahawk_sv.qm</file>
-<file>tomahawk_ja.qm</file>
-<file>tomahawk_ar.qm</file>
+<file>tomahawk_tr.qm</file>
+<file>tomahawk_zh_CN.qm</file>
+<file>tomahawk_zh_TW.qm</file>
 </qresource>
 </RCC>

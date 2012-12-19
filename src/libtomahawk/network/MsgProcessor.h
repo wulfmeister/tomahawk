@@ -31,7 +31,7 @@
 #define MSGPROCESSOR_H
 
 #include <QObject>
-#include <QtConcurrentRun>
+// #include <qtconcurrentrun.h>
 #include <QFuture>
 #include <QFutureWatcher>
 

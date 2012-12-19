@@ -21,7 +21,7 @@ macro(add_tomahawk_translations language)
 
     file(WRITE ${CMAKE_BINARY_DIR}/lang/tomahawk_i18n.qrc "${tomahawk_i18n_qrc_content}" )
 
-    QT4_ADD_TRANSLATION(QM_FILES ${TS_FILES})
+#     QT4_ADD_TRANSLATION(QM_FILES ${TS_FILES})
 
     ## HACK HACK HACK - around rcc limitations to allow out of source-tree building
     SET( trans_file tomahawk_i18n )

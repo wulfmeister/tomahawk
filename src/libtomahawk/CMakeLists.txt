@@ -11,7 +11,7 @@ IF( UNIX AND NOT APPLE )
   SET( QT_USE_QTDBUS TRUE )
 ENDIF( UNIX AND NOT APPLE )
 
-include( ${QT_USE_FILE} )
+# include( ${QT_USE_FILE} )
 
 add_definitions( ${QT_DEFINITIONS} )
 add_definitions( -DQT_SHARED )
@@ -85,9 +85,9 @@ set( libGuiSources
     playlist/dynamic/DynamicPlaylist.cpp
     playlist/dynamic/DynamicView.cpp
     playlist/dynamic/DynamicModel.cpp
-    playlist/dynamic/echonest/EchonestGenerator.cpp
-    playlist/dynamic/echonest/EchonestControl.cpp
-    playlist/dynamic/echonest/EchonestSteerer.cpp
+#     playlist/dynamic/echonest/EchonestGenerator.cpp
+#     playlist/dynamic/echonest/EchonestControl.cpp
+#     playlist/dynamic/echonest/EchonestSteerer.cpp
     playlist/dynamic/widgets/DynamicWidget.cpp
     playlist/dynamic/widgets/DynamicControlWrapper.cpp
     playlist/dynamic/widgets/DynamicControlList.cpp
@@ -351,14 +351,14 @@ include_directories(
 
     ${QT_INCLUDE_DIR}
     ${QJSON_INCLUDE_DIR}
-    ${ECHONEST_INCLUDE_DIR}
-    ${LIBLASTFM_INCLUDE_DIRS}
+#     ${ECHONEST_INCLUDE_DIR}
+#     ${LIBLASTFM_INCLUDE_DIRS}
     ${CLUCENE_INCLUDE_DIRS}
     ${PHONON_INCLUDES}
 
     ${LIBPORTFWD_INCLUDE_DIR}
     ${THIRDPARTY_DIR}/qxt/qxtweb-standalone/qxtweb
-    ${QuaZip_INCLUDE_DIR}
+#     ${QuaZip_INCLUDE_DIR}
 )
 
 IF(QCA2_FOUND)
@@ -369,6 +369,7 @@ IF(LIBATTICA_FOUND)
     SET( libGuiSources ${libGuiSources} AtticaManager.cpp )
     SET( libGuiHeaders ${libGuiHeaders} AtticaManager.h )
     INCLUDE_DIRECTORIES( ${LIBATTICA_INCLUDE_DIR} )
+    SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${LIBATTICA_LIBRARIES} ${QuaZip_LIBRARIES} )
 ENDIF(LIBATTICA_FOUND)
 
 IF( UNIX AND NOT APPLE )
@@ -435,20 +436,17 @@ IF(BUILD_GUI)
     LIST(APPEND libSources ${libGuiSources} )
 ENDIF()
 
-qt4_wrap_ui( libUI_H ${libUI} )
+# qt4_wrap_ui( libUI_H ${libUI} )
 
 SET( libSources ${libSources} ${libUI_H} )
 
 ADD_LIBRARY( tomahawklib SHARED ${libSources})
 set_target_properties(tomahawklib PROPERTIES AUTOMOC TRUE)
+qt5_use_modules(tomahawklib Widgets Network Sql)
 
 IF(QCA2_FOUND)
     SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${QCA2_LIBRARIES} )
 ENDIF(QCA2_FOUND)
-
-IF(LIBATTICA_FOUND)
-    SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${LIBATTICA_LIBRARIES} ${QuaZip_LIBRARIES} )
-ENDIF(LIBATTICA_FOUND)
 
 IF( UNIX AND NOT APPLE )
     SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${QT_QTDBUS_LIBRARY} )
@@ -463,7 +461,7 @@ TARGET_LINK_LIBRARIES( tomahawklib
     ${PHONON_LIBS}
     ${TAGLIB_LIBRARIES}
     ${CLUCENE_LIBRARIES}
-    ${ECHONEST_LIBRARIES}
+#     ${ECHONEST_LIBRARIES}
     ${QT_QTSQL_LIBRARY}
     ${QT_QTUITOOLS_LIBRARY}
     ${QT_QTGUI_LIBRARY}

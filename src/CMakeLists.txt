@@ -13,7 +13,7 @@ SET( QT_USE_QTNETWORK TRUE )
 SET( QT_USE_QTXML TRUE )
 SET( QT_USE_QTWEBKIT TRUE )
 
-INCLUDE( ${QT_USE_FILE} )
+# INCLUDE( ${QT_USE_FILE} )
 INCLUDE( AddAppIconMacro )
 
 #SET( CMAKE_BUILD_TYPE "Release" )
@@ -116,9 +116,9 @@ INCLUDE_DIRECTORIES(
     ${TAGLIB_INCLUDES}
     ${PHONON_INCLUDES}
     ${QJSON_INCLUDE_DIR}
-    ${LIBATTICA_INCLUDE_DIR}
-    ${ECHONEST_INCLUDE_DIR}
-    ${LIBLASTFM_INCLUDE_DIRS}
+#     ${LIBATTICA_INCLUDE_DIR}
+#     ${ECHONEST_INCLUDE_DIR}
+#     ${LIBLASTFM_INCLUDE_DIRS}
 )
 
 SET( OS_SPECIFIC_LINK_LIBRARIES "" )
@@ -161,7 +161,7 @@ SET( final_src ${final_src} ${tomahawkMoc} ${tomahawkSources} ${trans_outfile})
 
 IF( BUILD_GUI )
     LIST(APPEND tomahawkSources ${tomahawkSourcesGui})
-    qt4_wrap_ui( tomahawkUI_H ${tomahawkUI} )
+#     qt4_wrap_ui( tomahawkUI_H ${tomahawkUI} )
 
     IF( WITH_CRASHREPORTER )
         ADD_SUBDIRECTORY( breakpad/CrashReporter )
@@ -169,7 +169,7 @@ IF( BUILD_GUI )
 ENDIF()
 
 kde4_add_app_icon( tomahawkSources "${CMAKE_SOURCE_DIR}/data/icons/tomahawk-icon-*.png" )
-qt4_add_resources( RC_SRCS "../resources.qrc" )
+# qt4_add_resources( RC_SRCS "../resources.qrc" )
 
 SET( final_src ${final_src} ${tomahawkUI_H} ${tomahawkMoc} ${tomahawkSources} ${RC_SRCS} )
 
@@ -206,7 +206,7 @@ TARGET_LINK_LIBRARIES( tomahawk
     ${OS_SPECIFIC_LINK_LIBRARIES}
     ${QT_LIBRARIES}
     ${MAC_EXTRA_LIBS}
-    ${ECHONEST_LIBRARIES}
+#     ${ECHONEST_LIBRARIES}
     ${QXTWEB_LIBRARIES}
     ${QJSON_LIBRARIES}
     ${TAGLIB_LIBRARIES}

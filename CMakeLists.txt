@@ -85,21 +85,25 @@ INCLUDE( MacroOptionalFindPackage )
 INCLUDE( MacroLogFeature )
 
 # Check if we need qtgui:
-SET(NEEDED_QT4_COMPONENTS QtCore QtXml QtNetwork )
-IF( NOT BUILD_GUI )
-    ADD_DEFINITIONS( -DENABLE_HEADLESS )
-    MESSAGE( STATUS "Building Tomahawk ${TOMAHAWK_VERSION} in HEADLESS mode ***" )
-ELSE()
-    MESSAGE( STATUS "Building Tomahawk ${TOMAHAWK_VERSION} full GUI version ***" )
-    LIST(APPEND NEEDED_QT4_COMPONENTS "QtGui" "QtWebkit" "QtUiTools" )
-ENDIF()
+# SET(NEEDED_QT4_COMPONENTS QtCore QtXml QtNetwork )
+# IF( NOT BUILD_GUI )
+#     ADD_DEFINITIONS( -DENABLE_HEADLESS )
+#     MESSAGE( STATUS "Building Tomahawk ${TOMAHAWK_VERSION} in HEADLESS mode ***" )
+# ELSE()
+#     MESSAGE( STATUS "Building Tomahawk ${TOMAHAWK_VERSION} full GUI version ***" )
+#     LIST(APPEND NEEDED_QT4_COMPONENTS "QtGui" "QtWebkit" "QtUiTools" )
+# ENDIF()
+#
+# IF( BUILD_GUI AND UNIX AND NOT APPLE )
+#     FIND_PACKAGE( X11 )
+# ENDIF()
 
-IF( BUILD_GUI AND UNIX AND NOT APPLE )
-    FIND_PACKAGE( X11 )
-ENDIF()
 
-macro_optional_find_package(Qt4 4.7.0 COMPONENTS ${NEEDED_QT4_COMPONENTS} )
-macro_log_feature(QT4_FOUND "Qt" "A cross-platform application and UI framework" "http://qt.nokia.com" TRUE "" "If you see this, although libqt4-devel is installed, check whether the \n     qtwebkit-devel package and whatever contains QtUiTools is installed too")
+
+# macro_optional_find_package(Qt4 4.7.0 COMPONENTS ${NEEDED_QT4_COMPONENTS} )
+# macro_log_feature(QT4_FOUND "Qt" "A cross-platform application and UI framework" "http://qt.nokia.com" TRUE "" "If you see this, although libqt4-devel is installed, check whether the \n     qtwebkit-devel package and whatever contains QtUiTools is installed too")
+
+find_package(Qt5Core)
 
 macro_optional_find_package(Phonon 4.5.0)
 macro_log_feature(PHONON_FOUND "Phonon" "The Phonon multimedia library" "http://phonon.kde.org" TRUE "" "")
@@ -107,8 +111,8 @@ if(PHONON_FOUND)
     message(STATUS "Phonon found; ensure that phonon-vlc is at least 0.4")
 endif()
 
-macro_optional_find_package(Echonest 2.0.0)
-macro_log_feature(ECHONEST_FOUND "Echonest" "Qt library for communicating with The Echo Nest" "http://projects.kde.org/libechonest" TRUE "" "libechonest 2.0.0 is needed for dynamic playlists and the infosystem")
+# macro_optional_find_package(Echonest 2.0.0)
+# macro_log_feature(ECHONEST_FOUND "Echonest" "Qt library for communicating with The Echo Nest" "http://projects.kde.org/libechonest" TRUE "" "libechonest 2.0.0 is needed for dynamic playlists and the infosystem")
 
 macro_optional_find_package(CLucene 0.9.23)
 macro_log_feature(CLucene_FOUND "CLucene" "The open-source, C++ search engine" "http://clucene.sf.net" TRUE "" "CLucene is used for indexing the collection")
@@ -124,23 +128,23 @@ check_taglib_filename( COMPLEX_TAGLIB_FILENAME )
 macro_optional_find_package( Boost )
 macro_log_feature(Boost_FOUND "Boost" "Provides free peer-reviewed portable C++ source libraries" "http://www.boost.org" TRUE "" "") #FIXME: give useful explaination
 
-macro_optional_find_package(QCA2)
-macro_log_feature(QCA2_FOUND "QCA2" "Provides encryption and signing functions required for Grooveshark resolver" "http://delta.affinix.com/qca/" TRUE "" "")
-
-macro_optional_find_package(LibAttica 0.4.0)
-macro_log_feature(LIBATTICA_FOUND "libattica" "Provides support for automatic fetching and managing of resolvers from the tomahawk website" "https://projects.kde.org/projects/kdesupport/attica" TRUE "" "")
+# macro_optional_find_package(QCA2)
+# macro_log_feature(QCA2_FOUND "QCA2" "Provides encryption and signing functions required for Grooveshark resolver" "http://delta.affinix.com/qca/" TRUE "" "")
+#
+# macro_optional_find_package(LibAttica 0.4.0)
+# macro_log_feature(LIBATTICA_FOUND "libattica" "Provides support for automatic fetching and managing of resolvers from the tomahawk website" "https://projects.kde.org/projects/kdesupport/attica" TRUE "" "")
 
 macro_optional_find_package(QuaZip)
 macro_log_feature(QuaZip_FOUND "QuaZip" "Provides support for extracting downloaded resolvers automatically." "http://quazip.sourceforge.net/" TRUE "" "")
 
-macro_optional_find_package(Jreen 1.0.5)
-macro_log_feature(JREEN_FOUND "Jreen" "Qt XMPP Library" "http://qutim.org/jreen / https://github.com/euroelessar/jreen" FALSE "" "Jreen is needed for the Jabber SIP plugin.\n")
+# macro_optional_find_package(Jreen 1.0.5)
+# macro_log_feature(JREEN_FOUND "Jreen" "Qt XMPP Library" "http://qutim.org/jreen / https://github.com/euroelessar/jreen" FALSE "" "Jreen is needed for the Jabber SIP plugin.\n")
 
-macro_optional_find_package(QTweetLib)
-macro_log_feature(QTWEETLIB_FOUND "QTweetLib" "Qt Twitter Library" "https://github.com/minimoog/QTweetLib" FALSE "" "QTweetLib is needed for the Twitter SIP plugin.\n")
+# macro_optional_find_package(QTweetLib)
+# macro_log_feature(QTWEETLIB_FOUND "QTweetLib" "Qt Twitter Library" "https://github.com/minimoog/QTweetLib" FALSE "" "QTweetLib is needed for the Twitter SIP plugin.\n")
 
-macro_optional_find_package(LibLastFm 1.0.0)
-macro_log_feature(LIBLASTFM_FOUND "liblastfm" "Qt library for the Last.fm webservices" "https://github.com/eartle/liblastfm" TRUE "" "liblastfm is needed for scrobbling tracks to Last.fm and fetching cover artwork")
+# macro_optional_find_package(LibLastFm 1.0.0)
+# macro_log_feature(LIBLASTFM_FOUND "liblastfm" "Qt library for the Last.fm webservices" "https://github.com/eartle/liblastfm" TRUE "" "liblastfm is needed for scrobbling tracks to Last.fm and fetching cover artwork")
 
 IF( WIN32 )
     macro_optional_find_package(QtSparkle)

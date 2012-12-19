@@ -7,9 +7,9 @@ IF( ${CMAKE_VERSION} VERSION_GREATER 2.8.3 )
   CMAKE_POLICY(SET CMP0017 NEW)
 ENDIF( ${CMAKE_VERSION} VERSION_GREATER 2.8.3 )
 
-FIND_PACKAGE( Qt4 4.6.0 COMPONENTS QtCore QtNetwork REQUIRED )
-set(QT_USE_QTNETWORK TRUE)
-include( ${QT_USE_FILE} )
+# FIND_PACKAGE( Qt4 4.6.0 COMPONENTS QtCore QtNetwork REQUIRED )
+# set(QT_USE_QTNETWORK TRUE)
+# include( ${QT_USE_FILE} )
 
 SET(qxtweb "qxtweb")
 
@@ -70,7 +70,7 @@ SET( headers
 #        ${qxtweb}/qxtmetatype.h
 )
 
-qt4_wrap_cpp( mocstuff ${headers} )
+# qt4_wrap_cpp( mocstuff ${headers} )
 
 # DLL on windows due to linker issues, otherwise static
 IF(WIN32)
@@ -93,9 +93,11 @@ ELSE()
 ENDIF()
 
 
-target_link_libraries( qxtweb-standalone
-	    ${QT_LIBRARIES}
-)
+# target_link_libraries( qxtweb-standalone
+# 	    ${QT_LIBRARIES}
+# )
+
+qt5_use_modules(qxtweb-standalone Network)
 
 # Also build small example app from qxt demos:
 
