@@ -37,7 +37,6 @@
 #include <QNetworkReply>
 #include <QMetaProperty>
 #include <QCryptographicHash>
-#include <QWebInspector>
 
 // FIXME: bloody hack, remove this for 0.3
 // this one adds new functionality to old resolvers
@@ -343,14 +342,7 @@ QtScriptResolver::init()
     fillDataInWidgets( config );
 
     qDebug() << "JS" << filePath() << "READY," << "name" << m_name << "weight" << m_weight << "timeout" << m_timeout << "icon" << iconPath << "icon found" << success;
-
-    QWebInspector* wi = new QWebInspector(0);
-    wi->setWindowTitle( m_name );
     m_engine->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
-    wi->setPage(m_engine);
-    wi->setWindowTitle( m_name );
-    wi->show();
-
     m_ready = true;
 }
 

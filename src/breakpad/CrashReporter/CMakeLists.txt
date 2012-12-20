@@ -10,7 +10,7 @@ SET( crashreporter_UI CrashReporter.ui )
 SET( crashreporter_RC ../../../resources.qrc )
 
 QT5_WRAP_UI( crashreporter_UI_HEADERS ${crashreporter_UI} )
-# QT4_ADD_RESOURCES( crashreporter_RC_RCC ${crashreporter_RC} )
+QT5_ADD_RESOURCES( crashreporter_RC_RCC ${crashreporter_RC} )
 
 # INCLUDE( ${QT_USE_FILE} )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} ../../libtomahawk )
