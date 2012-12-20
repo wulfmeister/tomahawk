@@ -34,6 +34,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT MusixMatchPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "info.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 
@@ -59,10 +60,10 @@ virtual void notInCacheSlot( Tomahawk::InfoSystem::InfoStringHash criteria, Toma
         Q_UNUSED( criteria );
         Q_UNUSED( requestData );
     }
-    
+
 private:
     bool isValidTrackData( Tomahawk::InfoSystem::InfoRequestData requestData );
-    
+
     QString m_apiKey;
 };
 

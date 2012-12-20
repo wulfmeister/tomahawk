@@ -588,7 +588,7 @@ MprisPlugin::notifyPropertyChanged( const QString& interface, const QString& pro
         "PropertiesChanged" );
     signal << interface;
     QVariantMap changedProps;
-    changedProps.insert(propertyName, property(propertyName.toAscii()));
+    changedProps.insert(propertyName, property(propertyName.toLatin1()));
     signal << changedProps;
     signal << QStringList();
     QDBusConnection::sessionBus().send(signal);
@@ -598,4 +598,4 @@ MprisPlugin::notifyPropertyChanged( const QString& interface, const QString& pro
 
 } //ns Tomahawk
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MprisPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MprisPlugin )

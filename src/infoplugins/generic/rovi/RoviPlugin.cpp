@@ -19,12 +19,14 @@
 
 #include "RoviPlugin.h"
 
+#include "utils/Logger.h"
+
+#include <parser.h>
+
 #include <QDateTime>
 #include <QNetworkReply>
 #include <QtPlugin>
-
-#include <parser.h>
-#include "utils/Logger.h"
+#include <QUrlQuery>
 
 using namespace Tomahawk::InfoSystem;
 
@@ -79,9 +81,12 @@ RoviPlugin::notInCacheSlot( Tomahawk::InfoSystem::InfoStringHash criteria, Tomah
         case InfoAlbumSongs:
         {
             QUrl baseUrl = QUrl( "http://api.rovicorp.com/search/v2/music/search" );
-            baseUrl.addQueryItem( "query", QString( "%1 %2" ).arg( criteria[ "artist" ] ).arg( criteria[ "album" ] ) );
-            baseUrl.addQueryItem( "entitytype", "album" );
-            baseUrl.addQueryItem( "include", "album:tracks" );
+
+            QUrlQuery baseUrlQuery( baseUrl );
+            baseUrlQuery.addQueryItem( "query", QString( "%1 %2" ).arg( criteria[ "artist" ] ).arg( criteria[ "album" ] ) );
+            baseUrlQuery.addQueryItem( "entitytype", "album" );
+            baseUrlQuery.addQueryItem( "include", "album:tracks" );
+            baseUrl.setQuery( baseUrlQuery );
 
             QNetworkReply* reply = makeRequest( baseUrl );
 
@@ -178,8 +183,10 @@ RoviPlugin::albumLookupFinished()
 QNetworkReply*
 RoviPlugin::makeRequest( QUrl url )
 {
-    url.addQueryItem( "apikey", m_apiKey );
-    url.addEncodedQueryItem( "sig", generateSig() );
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "apikey", m_apiKey );
+    urlQuery.addQueryItem( "sig", generateSig() );
+    url.setQuery( urlQuery );
 
     qDebug() << "Rovi request url:" << url.toString();
     return TomahawkUtils::nam()->get( QNetworkRequest( url ) );
@@ -194,4 +201,4 @@ RoviPlugin::generateSig() const
 }
 
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::RoviPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::RoviPlugin )

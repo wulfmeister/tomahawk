@@ -32,6 +32,7 @@ namespace Accounts
 
 class ACCOUNTDLLEXPORT ZeroconfFactory : public AccountFactory
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "tomahawk_account_zeroconf.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::Accounts::AccountFactory )
 public:

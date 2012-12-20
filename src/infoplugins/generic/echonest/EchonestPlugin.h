@@ -37,6 +37,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT EchonestPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "info.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 
@@ -46,7 +47,7 @@ public:
 
 protected slots:
     virtual void init();
-    
+
     virtual void getInfo( Tomahawk::InfoSystem::InfoRequestData requestData );
 
     virtual void pushInfo( Tomahawk::InfoSystem::InfoPushData pushData )

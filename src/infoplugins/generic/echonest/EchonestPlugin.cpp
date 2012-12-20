@@ -313,4 +313,4 @@ EchonestPlugin::artistFromReply( QNetworkReply* reply )
 
 } //ns Tomahawk
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::EchonestPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::EchonestPlugin )

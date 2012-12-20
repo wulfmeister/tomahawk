@@ -126,4 +126,4 @@ ZeroconfAccount::sipPlugin()
 }
 
 
-Q_EXPORT_PLUGIN2( Tomahawk::Accounts::AccountFactory, Tomahawk::Accounts::ZeroconfFactory )
+// Q_EXPORT_PLUGIN2( Tomahawk::Accounts::AccountFactory, Tomahawk::Accounts::ZeroconfFactory )

@@ -21,12 +21,6 @@
 
 #include "ChartsPlugin.h"
 
-#include <QDir>
-#include <QSettings>
-#include <QNetworkConfiguration>
-#include <QNetworkReply>
-#include <QtPlugin>
-
 #include "Album.h"
 #include "CountryUtils.h"
 #include "Typedefs.h"
@@ -37,10 +31,18 @@
 #include "utils/TomahawkCache.h"
 #include "Source.h"
 
-#define CHART_URL "http://charts.tomahawk-player.org/"
-//#define CHART_URL "http://localhost:8080/"
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
+
+#include <QDir>
+#include <QSettings>
+#include <QNetworkConfiguration>
+#include <QNetworkReply>
+#include <QtPlugin>
+#include <QUrlQuery>
+
+#define CHART_URL "http://charts.tomahawk-player.org/"
+//#define CHART_URL "http://localhost:8080/"
 
 namespace Tomahawk
 {
@@ -267,7 +269,10 @@ void
 ChartsPlugin::fetchChartSourcesList( bool fetchOnlySourceList )
 {
     QUrl url = QUrl( QString ( CHART_URL "charts" ) );
-    url.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+    url.setQuery( urlQuery );
 
     QNetworkReply* reply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
     reply->setProperty( "only_source_list", fetchOnlySourceList );
@@ -356,7 +361,10 @@ ChartsPlugin::fetchAllChartSources()
         foreach ( const Tomahawk::InfoSystem::InfoStringHash source, m_chartResources )
         {
             QUrl url = QUrl( QString( CHART_URL "charts/%1" ).arg( source[ "chart_source" ] ) );
-            url.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+
+            QUrlQuery urlQuery( url );
+            urlQuery.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+            url.setQuery( urlQuery );
 
             QNetworkReply* reply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
             reply->setProperty( "chart_source", source[ "chart_source" ] );
@@ -375,7 +383,10 @@ ChartsPlugin::fetchChart( Tomahawk::InfoSystem::InfoRequestData requestData, con
 {
     /// Fetch the chart, we need source and id
     QUrl url = QUrl ( QString ( CHART_URL "charts/%1/%2" ).arg( source ).arg( chart_id ) );
-    url.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "version", TomahawkUtils::appFriendlyVersion() );
+    url.setQuery( urlQuery );
 
     tDebug( LOGVERBOSE ) << Q_FUNC_INFO << "fetching: " << url;
 
@@ -796,4 +807,4 @@ ChartsPlugin::getMaxAge( const qlonglong expires ) const
 
 }
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::ChartsPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::ChartsPlugin )

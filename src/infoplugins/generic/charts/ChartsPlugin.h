@@ -36,6 +36,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT ChartsPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "tomahawk_infoplugin_charts.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 

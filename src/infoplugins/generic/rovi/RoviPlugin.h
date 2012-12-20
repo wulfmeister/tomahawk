@@ -35,6 +35,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT RoviPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "info.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 
@@ -44,7 +45,7 @@ public:
 
 protected:
     virtual void init() {}
-    
+
     virtual void notInCacheSlot( Tomahawk::InfoSystem::InfoStringHash criteria, Tomahawk::InfoSystem::InfoRequestData requestData );
 
     virtual void pushInfo( Tomahawk::InfoSystem::InfoPushData pushData )

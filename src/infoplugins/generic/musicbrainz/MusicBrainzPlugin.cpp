@@ -19,12 +19,13 @@
 
 #include "MusicBrainzPlugin.h"
 
+#include "utils/TomahawkUtils.h"
+#include "utils/Logger.h"
+
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QtPlugin>
-
-#include "utils/TomahawkUtils.h"
-#include "utils/Logger.h"
+#include <QUrlQuery>
 
 using namespace Tomahawk::InfoSystem;
 
@@ -106,8 +107,11 @@ MusicBrainzPlugin::notInCacheSlot( InfoStringHash criteria, InfoRequestData requ
 
             QString requestString( "http://musicbrainz.org/ws/2/release-group" );
             QUrl url( requestString );
-            url.addQueryItem( "query", querySt );
-            url.addQueryItem( "limit", "100" );
+
+            QUrlQuery urlQuery( url );
+            urlQuery.addQueryItem( "query", querySt );
+            urlQuery.addQueryItem( "limit", "100" );
+            url.setQuery( urlQuery );
             tDebug() << Q_FUNC_INFO << url.toString();
             QNetworkReply* reply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
             reply->setProperty( "requestData", QVariant::fromValue< Tomahawk::InfoSystem::InfoRequestData >( requestData ) );
@@ -124,8 +128,12 @@ MusicBrainzPlugin::notInCacheSlot( InfoStringHash criteria, InfoRequestData requ
 
             QString requestString( "http://musicbrainz.org/ws/2/release" );
             QUrl url( requestString );
-            url.addQueryItem( "query", querySt );
-            url.addQueryItem( "limit", "100" );
+
+            QUrlQuery urlQuery( url );
+            urlQuery.addQueryItem( "query", querySt );
+            urlQuery.addQueryItem( "limit", "100" );
+            url.setQuery( urlQuery );
+
             tDebug() << Q_FUNC_INFO << url.toString();
             QNetworkReply* reply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
             reply->setProperty( "requestData", QVariant::fromValue< Tomahawk::InfoSystem::InfoRequestData >( requestData ) );
@@ -230,7 +238,10 @@ MusicBrainzPlugin::gotReleasesSlot()
 
             QString requestString = QString( "http://musicbrainz.org/ws/2/release/%1" ).arg( release_id );
             QUrl url( requestString );
-            url.addQueryItem( "inc", "recordings" );
+
+            QUrlQuery urlQuery( url );
+            urlQuery.addQueryItem( "inc", "recordings" );
+            url.setQuery( urlQuery );
             tDebug() << Q_FUNC_INFO << url.toString();
 
             QNetworkReply* newReply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
@@ -288,5 +299,5 @@ MusicBrainzPlugin::gotRecordingsSlot()
     emit updateCache( criteria, 0, requestData.type, returnedData );
 }
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MusicBrainzPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MusicBrainzPlugin )
 

@@ -37,6 +37,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT NewReleasesPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "info.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 public:

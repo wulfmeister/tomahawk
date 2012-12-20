@@ -36,6 +36,7 @@ namespace InfoSystem
 
 class INFOPLUGINDLLEXPORT MprisPlugin : public InfoPlugin
 {
+    Q_PLUGIN_METADATA(IID "org.tomahawk-player.account" FILE "info.json")
     Q_OBJECT
     Q_INTERFACES( Tomahawk::InfoSystem::InfoPlugin )
 
@@ -143,7 +144,7 @@ public slots:
 
 protected slots:
     virtual void init();
-    
+
     virtual void getInfo( Tomahawk::InfoSystem::InfoRequestData requestData )
     {
         Q_UNUSED( requestData );

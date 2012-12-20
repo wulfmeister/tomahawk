@@ -18,14 +18,17 @@
 
 #include "DiscogsPlugin.h"
 
-#include <QNetworkReply>
-#include <QDomDocument>
-#include <QtPlugin>
 
 #include "utils/TomahawkUtils.h"
 #include "utils/Logger.h"
 #include "utils/Closure.h"
+
 #include <parser.h>
+
+#include <QNetworkReply>
+#include <QDomDocument>
+#include <QtPlugin>
+#include <QUrlQuery>
 
 using namespace Tomahawk::InfoSystem;
 
@@ -89,9 +92,13 @@ DiscogsPlugin::notInCacheSlot( InfoStringHash criteria, InfoRequestData requestD
         {
             QString requestString( "http://api.discogs.com/database/search" );
             QUrl url( requestString );
-            url.addQueryItem( "type", "release" );
-            url.addQueryItem( "release_title", criteria[ "album" ] );
-            url.addQueryItem( "artist", criteria[ "artist" ] );
+
+            QUrlQuery urlQuery( url );
+            urlQuery.addQueryItem( "type", "release" );
+            urlQuery.addQueryItem( "release_title", criteria[ "album" ] );
+            urlQuery.addQueryItem( "artist", criteria[ "artist" ] );
+            url.setQuery( urlQuery );
+
             QNetworkRequest req( url );
             req.setRawHeader( "User-Agent", "TomahawkPlayer/1.0 +http://tomahawk-player.org" );
             QNetworkReply* reply = TomahawkUtils::nam()->get( req );
@@ -186,4 +193,4 @@ DiscogsPlugin::albumInfoSlot( const InfoRequestData& requestData, QNetworkReply*
 
 
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::DiscogsPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::DiscogsPlugin )

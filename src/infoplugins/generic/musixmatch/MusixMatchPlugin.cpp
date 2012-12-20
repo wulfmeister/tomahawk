@@ -19,12 +19,13 @@
 
 #include "MusixMatchPlugin.h"
 
+#include "utils/TomahawkUtils.h"
+#include "utils/Logger.h"
+
 #include <QNetworkReply>
 #include <QDomDocument>
 #include <QtPlugin>
-
-#include "utils/TomahawkUtils.h"
-#include "utils/Logger.h"
+#include <QUrlQuery>
 
 using namespace Tomahawk::InfoSystem;
 
@@ -64,9 +65,13 @@ MusixMatchPlugin::getInfo( Tomahawk::InfoSystem::InfoRequestData requestData )
     tDebug() << "artist is " << artist << ", track is " << track;
     QString requestString( "http://api.musixmatch.com/ws/1.1/track.search?format=xml&page_size=1&f_has_lyrics=1" );
     QUrl url( requestString );
-    url.addQueryItem( "apikey", m_apiKey );
-    url.addQueryItem( "q_artist", artist );
-    url.addQueryItem( "q_track", track );
+
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "apikey", m_apiKey );
+    urlQuery.addQueryItem( "q_artist", artist );
+    urlQuery.addQueryItem( "q_track", track );
+    url.setQuery( urlQuery );
+
     QNetworkReply* reply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
     reply->setProperty( "requestData", QVariant::fromValue< Tomahawk::InfoSystem::InfoRequestData >( requestData ) );
 
@@ -78,7 +83,7 @@ bool
 MusixMatchPlugin::isValidTrackData( Tomahawk::InfoSystem::InfoRequestData requestData )
 {
     tDebug() << Q_FUNC_INFO;
-    
+
     if ( !requestData.input.canConvert< Tomahawk::InfoSystem::InfoStringHash >() )
     {
         emit info( requestData, QVariant() );
@@ -123,8 +128,12 @@ MusixMatchPlugin::trackSearchSlot()
     QString track_id = domNodeList.at(0).toElement().text();
     QString requestString( "http://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id=%1&format=xml&apikey=%2" );
     QUrl url( requestString );
-    url.addQueryItem( "apikey", m_apiKey );
-    url.addQueryItem( "track_id", track_id );
+
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "apikey", m_apiKey );
+    urlQuery.addQueryItem( "track_id", track_id );
+    url.setQuery( urlQuery );
+
     QNetworkReply* newReply = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
     newReply->setProperty( "requestData", oldReply->property( "requestData" ) );
     connect( newReply, SIGNAL( finished() ), SLOT( trackLyricsSlot() ) );
@@ -152,4 +161,4 @@ MusixMatchPlugin::trackLyricsSlot()
 }
 
 
-Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MusixMatchPlugin )
+// Q_EXPORT_PLUGIN2( Tomahawk::InfoSystem::InfoPlugin, Tomahawk::InfoSystem::MusixMatchPlugin )
