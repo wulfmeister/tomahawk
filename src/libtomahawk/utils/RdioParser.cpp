@@ -87,33 +87,33 @@ RdioParser::parse( const QStringList& urls )
 void
 RdioParser::parseUrl( const QString& url )
 {
-    if ( url.contains( "rd.io" ) ) // shortened
-    {
-        ShortenedLinkParser* p = new ShortenedLinkParser( QStringList() << url, this );
-        connect( p, SIGNAL( urls( QStringList ) ), this, SLOT( expandedLinks( QStringList ) ) );
-        return;
-    }
-
-    if ( url.contains( "artist" ) && url.contains( "album" ) && url.contains( "track" ) )
-        parseTrack( url );
-    else
-    {
-        DropJob::DropType type = DropJob::None;
-        if ( url.contains( "artist" ) && url.contains( "album" ) )
-            type = DropJob::Album;
-        else if ( url.contains( "artist" ) )
-            type = DropJob::Artist;
-        else if ( url.contains( "people" ) && url.contains( "playlist" ) )
-            type = DropJob::Playlist;
-        else
-        {
-            tLog() << "Got Rdio URL I can't parse!" << url;
-            return;
-        }
-
-        // artist, album, or playlist link requre fetching
-        fetchObjectsFromUrl( url, type );
-    }
+//     if ( url.contains( "rd.io" ) ) // shortened
+//     {
+//         ShortenedLinkParser* p = new ShortenedLinkParser( QStringList() << url, this );
+//         connect( p, SIGNAL( urls( QStringList ) ), this, SLOT( expandedLinks( QStringList ) ) );
+//         return;
+//     }
+//
+//     if ( url.contains( "artist" ) && url.contains( "album" ) && url.contains( "track" ) )
+//         parseTrack( url );
+//     else
+//     {
+//         DropJob::DropType type = DropJob::None;
+//         if ( url.contains( "artist" ) && url.contains( "album" ) )
+//             type = DropJob::Album;
+//         else if ( url.contains( "artist" ) )
+//             type = DropJob::Artist;
+//         else if ( url.contains( "people" ) && url.contains( "playlist" ) )
+//             type = DropJob::Playlist;
+//         else
+//         {
+//             tLog() << "Got Rdio URL I can't parse!" << url;
+//             return;
+//         }
+//
+//         // artist, album, or playlist link requre fetching
+//         fetchObjectsFromUrl( url, type );
+//     }
 }
 
 
@@ -254,42 +254,42 @@ QNetworkRequest
 RdioParser::generateRequest( const QString& method, const QString& url, const QList< QPair< QByteArray, QByteArray > >& extraParams, QByteArray* data )
 {
     QUrl fetchUrl( "http://api.rdio.com/1/" );
-    QUrl toSignUrl = fetchUrl;
-
-    QPair<QByteArray, QByteArray> param;
-    foreach ( param, extraParams )
-    {
-        toSignUrl.addEncodedQueryItem( param.first, param.second );
-    }
-    toSignUrl.addQueryItem( "method", method );
-    toSignUrl.addEncodedQueryItem("oauth_consumer_key", "gk8zmyzj5xztt8aj48csaart" );
-    QString nonce;
-    for ( int i = 0; i < 8; i++ )
-        nonce += QString::number( qrand() % 10 );
-    toSignUrl.addQueryItem("oauth_nonce", nonce );
-    toSignUrl.addEncodedQueryItem("oauth_signature_method", "HMAC-SHA1");
-    toSignUrl.addQueryItem("oauth_timestamp", QString::number(QDateTime::currentMSecsSinceEpoch() / 1000 ) );
-    toSignUrl.addEncodedQueryItem("oauth_version",  "1.0");
-    toSignUrl.addEncodedQueryItem( "url", QUrl::toPercentEncoding( url ) );
-    int size = toSignUrl.encodedQueryItems().size();
-    for( int i = 0; i < size; i++ ) {
-        const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
-        data->append( item.first + "=" + item.second + "&" );
-    }
-    data->truncate( data->size() - 1 ); // remove extra &
-
-    QByteArray toSign = "POST&" + QUrl::toPercentEncoding( fetchUrl.toEncoded() ) + '&' + QUrl::toPercentEncoding( *data );
-    qDebug() << "Rdio" << toSign;
-
-    toSignUrl.addEncodedQueryItem( "oauth_signature", QUrl::toPercentEncoding( hmacSha1("yt35kakDyW&", toSign ) ) );
-
-    data->clear();
-    size = toSignUrl.encodedQueryItems().size();
-    for( int i = 0; i < size; i++ ) {
-        const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
-        data->append( item.first + "=" + item.second + "&" );
-    }
-    data->truncate( data->size() - 1 ); // remove extra &
+//     QUrl toSignUrl = fetchUrl;
+//
+//     QPair<QByteArray, QByteArray> param;
+//     foreach ( param, extraParams )
+//     {
+//         toSignUrl.addEncodedQueryItem( param.first, param.second );
+//     }
+//     toSignUrl.addQueryItem( "method", method );
+//     toSignUrl.addEncodedQueryItem("oauth_consumer_key", "gk8zmyzj5xztt8aj48csaart" );
+//     QString nonce;
+//     for ( int i = 0; i < 8; i++ )
+//         nonce += QString::number( qrand() % 10 );
+//     toSignUrl.addQueryItem("oauth_nonce", nonce );
+//     toSignUrl.addEncodedQueryItem("oauth_signature_method", "HMAC-SHA1");
+//     toSignUrl.addQueryItem("oauth_timestamp", QString::number(QDateTime::currentMSecsSinceEpoch() / 1000 ) );
+//     toSignUrl.addEncodedQueryItem("oauth_version",  "1.0");
+//     toSignUrl.addEncodedQueryItem( "url", QUrl::toPercentEncoding( url ) );
+//     int size = toSignUrl.encodedQueryItems().size();
+//     for( int i = 0; i < size; i++ ) {
+//         const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
+//         data->append( item.first + "=" + item.second + "&" );
+//     }
+//     data->truncate( data->size() - 1 ); // remove extra &
+//
+//     QByteArray toSign = "POST&" + QUrl::toPercentEncoding( fetchUrl.toEncoded() ) + '&' + QUrl::toPercentEncoding( *data );
+//     qDebug() << "Rdio" << toSign;
+//
+//     toSignUrl.addEncodedQueryItem( "oauth_signature", QUrl::toPercentEncoding( hmacSha1("yt35kakDyW&", toSign ) ) );
+//
+//     data->clear();
+//     size = toSignUrl.encodedQueryItems().size();
+//     for( int i = 0; i < size; i++ ) {
+//         const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
+//         data->append( item.first + "=" + item.second + "&" );
+//     }
+//     data->truncate( data->size() - 1 ); // remove extra &
 
     QNetworkRequest request = QNetworkRequest( fetchUrl );
     request.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );

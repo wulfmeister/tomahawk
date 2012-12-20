@@ -29,7 +29,7 @@
 #include "database/LocalCollection.h"
 #include "playlist/dynamic/GeneratorInterface.h"
 
-#include "echonest/Playlist.h"
+// #include "echonest/Playlist.h"
 
 #include "utils/XspfLoader.h"
 #include "utils/XspfGenerator.h"
@@ -46,17 +46,18 @@
     #include "playlist/PlaylistView.h"
     #include "widgets/SearchWidget.h"
 
-    #include <QtGui/QApplication>
-    #include <QtGui/QClipboard>
+    #include <QApplication>
+    #include <QClipboard>
 #endif
 
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkConfiguration>
-#include <QtNetwork/QNetworkProxy>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkConfiguration>
+#include <QNetworkProxy>
 
-#include <QtCore/QMimeData>
-#include <QtCore/QUrl>
+#include <QMimeData>
+#include <QUrl>
+#include <QUrlQuery>
 
 
 GlobalActionManager* GlobalActionManager::s_instance = 0;
@@ -128,12 +129,16 @@ GlobalActionManager::openLink( const QString& title, const QString& artist, cons
 {
     QUrl link( QString( "%1/open/track/" ).arg( hostname() ) );
 
+    QUrlQuery urlQuery( link );
+
     if ( !artist.isEmpty() )
-        link.addQueryItem( "artist", artist );
+        urlQuery.addQueryItem( "artist", artist );
     if ( !title.isEmpty() )
-        link.addQueryItem( "title", title );
+        urlQuery.addQueryItem( "title", title );
     if ( !album.isEmpty() )
-        link.addQueryItem( "album", album );
+        urlQuery.addQueryItem( "album", album );
+
+    link.setQuery( urlQuery );
 
     return link;
 }
@@ -221,36 +226,38 @@ GlobalActionManager::copyPlaylistToClipboard( const dynplaylist_ptr& playlist )
         return QString();
     }
 
-    link.addEncodedQueryItem( "type", "echonest" );
-    link.addQueryItem( "title", playlist->title() );
+    QUrlQuery urlQuery( link );
+    urlQuery.addQueryItem( "type", "echonest" );
+    urlQuery.addQueryItem( "title", playlist->title() );
+    link.setQuery( urlQuery );
 
     QList< dyncontrol_ptr > controls = playlist->generator()->controls();
     foreach ( const dyncontrol_ptr& c, controls )
     {
-        if ( c->selectedType() == "Artist" )
-        {
-            if ( c->match().toInt() == Echonest::DynamicPlaylist::ArtistType )
-                link.addQueryItem( "artist_limitto", c->input() );
-            else
-                link.addQueryItem( "artist", c->input() );
-        }
-        else if ( c->selectedType() == "Artist Description" )
-        {
-            link.addQueryItem( "description", c->input() );
-        }
-        else
-        {
-            QString name = c->selectedType().toLower().replace( " ", "_" );
-            Echonest::DynamicPlaylist::PlaylistParam p = static_cast< Echonest::DynamicPlaylist::PlaylistParam >( c->match().toInt() );
-            // if it is a max, set that too
-            if ( p == Echonest::DynamicPlaylist::MaxTempo || p == Echonest::DynamicPlaylist::MaxDuration || p == Echonest::DynamicPlaylist::MaxLoudness
-               || p == Echonest::DynamicPlaylist::MaxDanceability || p == Echonest::DynamicPlaylist::MaxEnergy || p == Echonest::DynamicPlaylist::ArtistMaxFamiliarity
-               || p == Echonest::DynamicPlaylist::ArtistMaxHotttnesss || p == Echonest::DynamicPlaylist::SongMaxHotttnesss || p == Echonest::DynamicPlaylist::ArtistMaxLatitude
-               || p == Echonest::DynamicPlaylist::ArtistMaxLongitude )
-                name += "_max";
-
-            link.addQueryItem( name, c->input() );
-        }
+//         if ( c->selectedType() == "Artist" )
+//         {
+//             if ( c->match().toInt() == Echonest::DynamicPlaylist::ArtistType )
+//                 link.addQueryItem( "artist_limitto", c->input() );
+//             else
+//                 link.addQueryItem( "artist", c->input() );
+//         }
+//         else if ( c->selectedType() == "Artist Description" )
+//         {
+//             link.addQueryItem( "description", c->input() );
+//         }
+//         else
+//         {
+//             QString name = c->selectedType().toLower().replace( " ", "_" );
+//             Echonest::DynamicPlaylist::PlaylistParam p = static_cast< Echonest::DynamicPlaylist::PlaylistParam >( c->match().toInt() );
+//             // if it is a max, set that too
+//             if ( p == Echonest::DynamicPlaylist::MaxTempo || p == Echonest::DynamicPlaylist::MaxDuration || p == Echonest::DynamicPlaylist::MaxLoudness
+//                || p == Echonest::DynamicPlaylist::MaxDanceability || p == Echonest::DynamicPlaylist::MaxEnergy || p == Echonest::DynamicPlaylist::ArtistMaxFamiliarity
+//                || p == Echonest::DynamicPlaylist::ArtistMaxHotttnesss || p == Echonest::DynamicPlaylist::SongMaxHotttnesss || p == Echonest::DynamicPlaylist::ArtistMaxLatitude
+//                || p == Echonest::DynamicPlaylist::ArtistMaxLongitude )
+//                 name += "_max";
+//
+//             link.addQueryItem( name, c->input() );
+//         }
     }
 
     QClipboard* cb = QApplication::clipboard();
@@ -307,89 +314,89 @@ GlobalActionManager::parseTomahawkLink( const QString& urlIn )
 
     if ( url.contains( "tomahawk://" ) )
     {
-        QString cmd = url.mid( 11 );
-        cmd.replace( "%2B", "%20" );
-        cmd.replace( "+", "%20" ); // QUrl doesn't parse '+' into " "
-        tLog() << "Parsing tomahawk link command" << cmd;
-
-        QString cmdType = cmd.split( "/" ).first();
-        QUrl u = QUrl::fromEncoded( cmd.toUtf8() );
-
-        // for backwards compatibility
-        if ( cmdType == "load" )
-        {
-            if ( u.hasQueryItem( "xspf" ) )
-            {
-                QUrl xspf = QUrl::fromUserInput( u.queryItemValue( "xspf" ) );
-                XSPFLoader* l = new XSPFLoader( true, this );
-                tDebug() << "Loading spiff:" << xspf.toString();
-                l->load( xspf );
-                connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), ViewManager::instance(), SLOT( show( Tomahawk::playlist_ptr ) ) );
-
-                return true;
-            }
-            else if ( u.hasQueryItem( "jspf" ) )
-            {
-                QUrl jspf = QUrl::fromUserInput( u.queryItemValue( "jspf" ) );
-                JSPFLoader* l = new JSPFLoader( true, this );
-
-                tDebug() << "Loading jspiff:" << jspf.toString();
-                l->load( jspf );
-                connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), ViewManager::instance(), SLOT( show( Tomahawk::playlist_ptr ) ) );
-
-                return true;
-            }
-        }
-
-        if ( cmdType == "playlist" )
-        {
-            return handlePlaylistCommand( u );
-        }
-        else if ( cmdType == "collection" )
-        {
-            return handleCollectionCommand( u );
-        }
-        else if ( cmdType == "queue" )
-        {
-            return handleQueueCommand( u );
-        }
-        else if ( cmdType == "station" )
-        {
-            return handleStationCommand( u );
-        }
-        else if ( cmdType == "autoplaylist" )
-        {
-            return handleAutoPlaylistCommand( u );
-        }
-        else if ( cmdType == "search" )
-        {
-            return handleSearchCommand( u );
-        }
-        else if ( cmdType == "play" )
-        {
-            return handlePlayCommand( u );
-        }
-        else if ( cmdType == "bookmark" )
-        {
-            return handlePlayCommand( u );
-        }
-        else if ( cmdType == "open" )
-        {
-            return handleOpenCommand( u );
-        }
-        else if ( cmdType == "view" )
-        {
-            return handleViewCommand( u );
-        }
-        else if ( cmdType == "import" )
-        {
-            return handleImportCommand( u );
-        }
-        else
-        {
-            tLog() << "Tomahawk link not supported, command not known!" << cmdType << u.path();
-            return false;
-        }
+//         QString cmd = url.mid( 11 );
+//         cmd.replace( "%2B", "%20" );
+//         cmd.replace( "+", "%20" ); // QUrl doesn't parse '+' into " "
+//         tLog() << "Parsing tomahawk link command" << cmd;
+//
+//         QString cmdType = cmd.split( "/" ).first();
+//         QUrl u = QUrl::fromEncoded( cmd.toUtf8() );
+//
+//         // for backwards compatibility
+//         if ( cmdType == "load" )
+//         {
+//             if ( u.hasQueryItem( "xspf" ) )
+//             {
+//                 QUrl xspf = QUrl::fromUserInput( u.queryItemValue( "xspf" ) );
+//                 XSPFLoader* l = new XSPFLoader( true, this );
+//                 tDebug() << "Loading spiff:" << xspf.toString();
+//                 l->load( xspf );
+//                 connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), ViewManager::instance(), SLOT( show( Tomahawk::playlist_ptr ) ) );
+//
+//                 return true;
+//             }
+//             else if ( u.hasQueryItem( "jspf" ) )
+//             {
+//                 QUrl jspf = QUrl::fromUserInput( u.queryItemValue( "jspf" ) );
+//                 JSPFLoader* l = new JSPFLoader( true, this );
+//
+//                 tDebug() << "Loading jspiff:" << jspf.toString();
+//                 l->load( jspf );
+//                 connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), ViewManager::instance(), SLOT( show( Tomahawk::playlist_ptr ) ) );
+//
+//                 return true;
+//             }
+//         }
+//
+//         if ( cmdType == "playlist" )
+//         {
+//             return handlePlaylistCommand( u );
+//         }
+//         else if ( cmdType == "collection" )
+//         {
+//             return handleCollectionCommand( u );
+//         }
+//         else if ( cmdType == "queue" )
+//         {
+//             return handleQueueCommand( u );
+//         }
+//         else if ( cmdType == "station" )
+//         {
+//             return handleStationCommand( u );
+//         }
+//         else if ( cmdType == "autoplaylist" )
+//         {
+//             return handleAutoPlaylistCommand( u );
+//         }
+//         else if ( cmdType == "search" )
+//         {
+//             return handleSearchCommand( u );
+//         }
+//         else if ( cmdType == "play" )
+//         {
+//             return handlePlayCommand( u );
+//         }
+//         else if ( cmdType == "bookmark" )
+//         {
+//             return handlePlayCommand( u );
+//         }
+//         else if ( cmdType == "open" )
+//         {
+//             return handleOpenCommand( u );
+//         }
+//         else if ( cmdType == "view" )
+//         {
+//             return handleViewCommand( u );
+//         }
+//         else if ( cmdType == "import" )
+//         {
+//             return handleImportCommand( u );
+//         }
+//         else
+//         {
+//             tLog() << "Tomahawk link not supported, command not known!" << cmdType << u.path();
+//             return false;
+//         }
     }
     else
     {
@@ -402,51 +409,51 @@ GlobalActionManager::parseTomahawkLink( const QString& urlIn )
 bool
 GlobalActionManager::handlePlaylistCommand( const QUrl& url )
 {
-    QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
-    if ( parts.isEmpty() )
-    {
-        tLog() << "No specific playlist command:" << url.toString();
-        return false;
-    }
-
-    if ( parts[ 0 ] == "import" )
-    {
-        if ( !url.hasQueryItem( "xspf" ) && !url.hasQueryItem( "jspf") )
-        {
-            tDebug() << "No xspf or jspf to load...";
-            return false;
-        }
-        if ( url.hasQueryItem( "xspf" ) )
-        {
-            createPlaylistFromUrl( "xspf", url.queryItemValue( "xspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
-            return true;
-        }
-        else if ( url.hasQueryItem( "jspf" ) )
-        {
-            createPlaylistFromUrl( "jspf", url.queryItemValue( "jspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
-            return true;
-        }
-    }
-    else if ( parts [ 0 ] == "new" )
-    {
-        if ( !url.hasQueryItem( "title" ) )
-        {
-            tLog() << "New playlist command needs a title...";
-            return false;
-        }
-        playlist_ptr pl = Playlist::create( SourceList::instance()->getLocal(), uuid(), url.queryItemValue( "title" ), QString(), QString(), false );
-        ViewManager::instance()->show( pl );
-    }
-    else if ( parts[ 0 ] == "add" )
-    {
-        if ( !url.hasQueryItem( "playlistid" ) || !url.hasQueryItem( "title" ) || !url.hasQueryItem( "artist" ) )
-        {
-            tLog() << "Add to playlist command needs playlistid, track, and artist..." << url.toString();
-            return false;
-        }
-        // TODO implement. Let the user select what playlist to add to
-        return false;
-    }
+//     QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
+//     if ( parts.isEmpty() )
+//     {
+//         tLog() << "No specific playlist command:" << url.toString();
+//         return false;
+//     }
+//
+//     if ( parts[ 0 ] == "import" )
+//     {
+//         if ( !url.hasQueryItem( "xspf" ) && !url.hasQueryItem( "jspf") )
+//         {
+//             tDebug() << "No xspf or jspf to load...";
+//             return false;
+//         }
+//         if ( url.hasQueryItem( "xspf" ) )
+//         {
+//             createPlaylistFromUrl( "xspf", url.queryItemValue( "xspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
+//             return true;
+//         }
+//         else if ( url.hasQueryItem( "jspf" ) )
+//         {
+//             createPlaylistFromUrl( "jspf", url.queryItemValue( "jspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
+//             return true;
+//         }
+//     }
+//     else if ( parts [ 0 ] == "new" )
+//     {
+//         if ( !url.hasQueryItem( "title" ) )
+//         {
+//             tLog() << "New playlist command needs a title...";
+//             return false;
+//         }
+//         playlist_ptr pl = Playlist::create( SourceList::instance()->getLocal(), uuid(), url.queryItemValue( "title" ), QString(), QString(), false );
+//         ViewManager::instance()->show( pl );
+//     }
+//     else if ( parts[ 0 ] == "add" )
+//     {
+//         if ( !url.hasQueryItem( "playlistid" ) || !url.hasQueryItem( "title" ) || !url.hasQueryItem( "artist" ) )
+//         {
+//             tLog() << "Add to playlist command needs playlistid, track, and artist..." << url.toString();
+//             return false;
+//         }
+//         // TODO implement. Let the user select what playlist to add to
+//         return false;
+//     }
 
     return false;
 }
@@ -455,23 +462,23 @@ GlobalActionManager::handlePlaylistCommand( const QUrl& url )
 bool
 GlobalActionManager::handleImportCommand( const QUrl& url )
 {
-    QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
-    if ( parts.size() < 1 )
-        return false;
-
-    if ( parts[ 0 ] == "playlist" )
-    {
-        if ( url.hasQueryItem( "xspf" ) )
-        {
-            createPlaylistFromUrl( "xspf", url.queryItemValue( "xspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
-            return true;
-        }
-        else if ( url.hasQueryItem( "jspf" ) )
-        {
-            createPlaylistFromUrl( "jspf", url.queryItemValue( "jspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
-            return true;
-        }
-    }
+//     QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
+//     if ( parts.size() < 1 )
+//         return false;
+//
+//     if ( parts[ 0 ] == "playlist" )
+//     {
+//         if ( url.hasQueryItem( "xspf" ) )
+//         {
+//             createPlaylistFromUrl( "xspf", url.queryItemValue( "xspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
+//             return true;
+//         }
+//         else if ( url.hasQueryItem( "jspf" ) )
+//         {
+//             createPlaylistFromUrl( "jspf", url.queryItemValue( "jspf" ), url.hasQueryItem( "title" ) ? url.queryItemValue( "title" ) : QString() );
+//             return true;
+//         }
+//     }
 
     return false;
 }
@@ -480,22 +487,22 @@ GlobalActionManager::handleImportCommand( const QUrl& url )
 void
 GlobalActionManager::createPlaylistFromUrl( const QString& type, const QString &url, const QString& title )
 {
-    if ( type == "xspf" )
-    {
-        QUrl xspf = QUrl::fromUserInput( url );
-        XSPFLoader* l= new XSPFLoader( true, this );
-        l->setOverrideTitle( title );
-        l->load( xspf );
-        connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), this, SLOT( playlistCreatedToShow( Tomahawk::playlist_ptr) ) );
-    }
-    else if ( type == "jspf" )
-    {
-        QUrl jspf = QUrl::fromUserInput( url );
-        JSPFLoader* l= new JSPFLoader( true, this );
-        l->setOverrideTitle( title );
-        l->load( jspf );
-        connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), this, SLOT( playlistCreatedToShow( Tomahawk::playlist_ptr) ) );
-    }
+//     if ( type == "xspf" )
+//     {
+//         QUrl xspf = QUrl::fromUserInput( url );
+//         XSPFLoader* l= new XSPFLoader( true, this );
+//         l->setOverrideTitle( title );
+//         l->load( xspf );
+//         connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), this, SLOT( playlistCreatedToShow( Tomahawk::playlist_ptr) ) );
+//     }
+//     else if ( type == "jspf" )
+//     {
+//         QUrl jspf = QUrl::fromUserInput( url );
+//         JSPFLoader* l= new JSPFLoader( true, this );
+//         l->setOverrideTitle( title );
+//         l->load( jspf );
+//         connect( l, SIGNAL( ok( Tomahawk::playlist_ptr ) ), this, SLOT( playlistCreatedToShow( Tomahawk::playlist_ptr) ) );
+//     }
 }
 
 
@@ -547,7 +554,7 @@ GlobalActionManager::handleOpenCommand( const QUrl& url )
         return false;
     }
     // TODO user configurable in the UI
-    return doQueueAdd( parts, url.queryItems() );
+    return doQueueAdd( parts, QUrlQuery(url).queryItems() );
 }
 
 
@@ -601,7 +608,7 @@ GlobalActionManager::handleQueueCommand( const QUrl& url )
 
     if ( parts[ 0 ] == "add" )
     {
-        doQueueAdd( parts.mid( 1 ), url.queryItems() );
+        doQueueAdd( parts.mid( 1 ), QUrlQuery(url).queryItems() );
     }
     else
     {
@@ -781,26 +788,26 @@ GlobalActionManager::queueRdio( const QStringList& , const QList< QPair< QString
 bool
 GlobalActionManager::handleSearchCommand( const QUrl& url )
 {
-    // open the super collection and set this as the search filter
-    QString queryStr;
-    if ( url.hasQueryItem( "query" ) )
-        queryStr = url.queryItemValue( "query" );
-    else
-    {
-        QStringList query;
-        if ( url.hasQueryItem( "artist" ) )
-            query << url.queryItemValue( "artist" );
-        if ( url.hasQueryItem( "album" ) )
-            query << url.queryItemValue( "album" );
-        if ( url.hasQueryItem( "title" ) )
-            query << url.queryItemValue( "title" );
-        queryStr = query.join( " " );
-    }
-
-    if ( queryStr.trimmed().isEmpty() )
-        return false;
-
-    ViewManager::instance()->show( new SearchWidget( queryStr.trimmed() ) );
+//     // open the super collection and set this as the search filter
+//     QString queryStr;
+//     if ( url.hasQueryItem( "query" ) )
+//         queryStr = url.queryItemValue( "query" );
+//     else
+//     {
+//         QStringList query;
+//         if ( url.hasQueryItem( "artist" ) )
+//             query << url.queryItemValue( "artist" );
+//         if ( url.hasQueryItem( "album" ) )
+//             query << url.queryItemValue( "album" );
+//         if ( url.hasQueryItem( "title" ) )
+//             query << url.queryItemValue( "title" );
+//         queryStr = query.join( " " );
+//     }
+//
+//     if ( queryStr.trimmed().isEmpty() )
+//         return false;
+//
+//     ViewManager::instance()->show( new SearchWidget( queryStr.trimmed() ) );
 
     return true;
 }
@@ -808,61 +815,61 @@ GlobalActionManager::handleSearchCommand( const QUrl& url )
 bool
 GlobalActionManager::handleViewCommand( const QUrl& url )
 {
-    QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
-    if ( parts.isEmpty() )
-    {
-        tLog() << "No specific view command:" << url.toString();
-        return false;
-    }
-
-    if ( parts[ 0 ] == "artist" )
-    {
-        const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
-        if ( artist.isEmpty() )
-        {
-            tLog() << "No artist supplied for view/artist command.";
-            return false;
-        }
-
-        artist_ptr artistPtr = Artist::get( artist );
-        if ( !artistPtr.isNull() )
-            ViewManager::instance()->show( artistPtr );
-
-        return true;
-    }
-    else if ( parts[ 0 ] == "album" )
-    {
-        const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "artist" ) ).replace( "+", " " );
-        const QString album = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
-        if ( artist.isEmpty() || album.isEmpty() )
-        {
-            tLog() << "No artist or album supplied for view/album command:" << url;
-            return false;
-        }
-
-        album_ptr albumPtr = Album::get( Artist::get( artist, false ), album, false );
-        if ( !albumPtr.isNull() )
-            ViewManager::instance()->show( albumPtr );
-
-        return true;
-    }
-    else if ( parts[ 0 ] == "track" )
-    {
-        const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "artist" ) ).replace( "+", " " );
-        const QString album = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "album" ) ).replace( "+", " " );
-        const QString track = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
-        if ( artist.isEmpty() || track.isEmpty() )
-        {
-            tLog() << "No artist or track supplied for view/track command:" << url;
-            return false;
-        }
-
-        query_ptr queryPtr = Query::get( artist, track, album );
-        if ( !queryPtr.isNull() )
-            ViewManager::instance()->show( queryPtr );
-
-        return true;
-    }
+//     QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
+//     if ( parts.isEmpty() )
+//     {
+//         tLog() << "No specific view command:" << url.toString();
+//         return false;
+//     }
+//
+//     if ( parts[ 0 ] == "artist" )
+//     {
+//         const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
+//         if ( artist.isEmpty() )
+//         {
+//             tLog() << "No artist supplied for view/artist command.";
+//             return false;
+//         }
+//
+//         artist_ptr artistPtr = Artist::get( artist );
+//         if ( !artistPtr.isNull() )
+//             ViewManager::instance()->show( artistPtr );
+//
+//         return true;
+//     }
+//     else if ( parts[ 0 ] == "album" )
+//     {
+//         const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "artist" ) ).replace( "+", " " );
+//         const QString album = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
+//         if ( artist.isEmpty() || album.isEmpty() )
+//         {
+//             tLog() << "No artist or album supplied for view/album command:" << url;
+//             return false;
+//         }
+//
+//         album_ptr albumPtr = Album::get( Artist::get( artist, false ), album, false );
+//         if ( !albumPtr.isNull() )
+//             ViewManager::instance()->show( albumPtr );
+//
+//         return true;
+//     }
+//     else if ( parts[ 0 ] == "track" )
+//     {
+//         const QString artist = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "artist" ) ).replace( "+", " " );
+//         const QString album = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "album" ) ).replace( "+", " " );
+//         const QString track = QUrl::fromPercentEncoding( url.encodedQueryItemValue( "name" ) ).replace( "+", " " );
+//         if ( artist.isEmpty() || track.isEmpty() )
+//         {
+//             tLog() << "No artist or track supplied for view/track command:" << url;
+//             return false;
+//         }
+//
+//         query_ptr queryPtr = Query::get( artist, track, album );
+//         if ( !queryPtr.isNull() )
+//             ViewManager::instance()->show( queryPtr );
+//
+//         return true;
+//     }
 
     return false;
 }
@@ -878,185 +885,185 @@ GlobalActionManager::handleAutoPlaylistCommand( const QUrl& url )
 Tomahawk::dynplaylist_ptr
 GlobalActionManager::loadDynamicPlaylist( const QUrl& url, bool station )
 {
-    QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
-    if ( parts.isEmpty() )
-    {
-        tLog() << "No specific station command:" << url.toString();
-        return Tomahawk::dynplaylist_ptr();
-    }
-
-    if ( parts[ 0 ] == "create" )
-    {
-        if ( !url.hasQueryItem( "title" ) || !url.hasQueryItem( "type" ) )
-        {
-            tLog() << "Station create command needs title and type..." << url.toString();
-            return Tomahawk::dynplaylist_ptr();
-        }
-        QString title = url.queryItemValue( "title" );
-        QString type = url.queryItemValue( "type" );
-        GeneratorMode m = Static;
-        if ( station )
-            m = OnDemand;
-
-        dynplaylist_ptr pl = DynamicPlaylist::create( SourceList::instance()->getLocal(), uuid(), title, QString(), QString(), m, false, type );
-        pl->setMode( m );
-        QList< dyncontrol_ptr > controls;
-        QPair< QString, QString > param;
-        foreach ( param, url.queryItems() )
-        {
-            if ( param.first == "artist" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Artist" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistRadioType ) );
-                controls << c;
-            }
-            else if ( param.first == "artist_limitto" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Artist" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistType ) );
-                controls << c;
-            }
-            else if ( param.first == "description" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Artist Description" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistDescriptionType ) );
-                controls << c;
-            }
-            else if ( param.first == "variety" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Variety" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Variety ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "tempo" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Tempo" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinTempo + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "duration" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Duration" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinDuration + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "loudness" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Loudness" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinLoudness + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "danceability" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Danceability" );
-                int extra = param.first.endsWith( "_max" ) ? 1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinDanceability + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "energy" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Energy" );
-                int extra = param.first.endsWith( "_max" ) ? 1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinEnergy + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "artist_familiarity" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Artist Familiarity" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinFamiliarity + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "artist_hotttnesss" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Artist Hotttnesss" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinHotttnesss + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "song_hotttnesss" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Song Hotttnesss" );
-                int extra = param.first.endsWith( "_max" ) ? -1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::SongMinHotttnesss + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "longitude" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Longitude" );
-                int extra = param.first.endsWith( "_max" ) ? 1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinLongitude + extra ) );
-                controls << c;
-            }
-            else if ( param.first.startsWith( "latitude" ) )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Latitude" );
-                int extra = param.first.endsWith( "_max" ) ? 1 : 0;
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinLatitude + extra ) );
-                controls << c;
-            }
-            else if ( param.first == "key" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Key" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Key ) );
-                controls << c;
-            }
-            else if ( param.first == "mode" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Mode" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Mode ) );
-                controls << c;
-            }
-            else if ( param.first == "mood" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Mood" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Mood ) );
-                controls << c;
-            }
-            else if ( param.first == "style" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Style" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Style ) );
-                controls << c;
-            }
-            else if ( param.first == "song" )
-            {
-                dyncontrol_ptr c = pl->generator()->createControl( "Song" );
-                c->setInput( param.second );
-                c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::SongRadioType ) );
-                controls << c;
-            }
-        }
-
-        if ( m == OnDemand )
-            pl->createNewRevision( uuid(), pl->currentrevision(), type, controls );
-        else
-            pl->createNewRevision( uuid(), pl->currentrevision(), type, controls, pl->entries() );
-
-        ViewManager::instance()->show( pl );
-        return pl;
-    }
+//     QStringList parts = url.path().split( "/" ).mid( 1 ); // get the rest of the command
+//     if ( parts.isEmpty() )
+//     {
+//         tLog() << "No specific station command:" << url.toString();
+//         return Tomahawk::dynplaylist_ptr();
+//     }
+//
+//     if ( parts[ 0 ] == "create" )
+//     {
+//         if ( !url.hasQueryItem( "title" ) || !url.hasQueryItem( "type" ) )
+//         {
+//             tLog() << "Station create command needs title and type..." << url.toString();
+//             return Tomahawk::dynplaylist_ptr();
+//         }
+//         QString title = url.queryItemValue( "title" );
+//         QString type = url.queryItemValue( "type" );
+//         GeneratorMode m = Static;
+//         if ( station )
+//             m = OnDemand;
+//
+//         dynplaylist_ptr pl = DynamicPlaylist::create( SourceList::instance()->getLocal(), uuid(), title, QString(), QString(), m, false, type );
+//         pl->setMode( m );
+//         QList< dyncontrol_ptr > controls;
+//         QPair< QString, QString > param;
+//         foreach ( param, url.queryItems() )
+//         {
+//             if ( param.first == "artist" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Artist" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistRadioType ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "artist_limitto" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Artist" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistType ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "description" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Artist Description" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistDescriptionType ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "variety" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Variety" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Variety ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "tempo" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Tempo" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinTempo + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "duration" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Duration" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinDuration + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "loudness" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Loudness" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinLoudness + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "danceability" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Danceability" );
+//                 int extra = param.first.endsWith( "_max" ) ? 1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinDanceability + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "energy" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Energy" );
+//                 int extra = param.first.endsWith( "_max" ) ? 1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::MinEnergy + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "artist_familiarity" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Artist Familiarity" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinFamiliarity + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "artist_hotttnesss" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Artist Hotttnesss" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinHotttnesss + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "song_hotttnesss" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Song Hotttnesss" );
+//                 int extra = param.first.endsWith( "_max" ) ? -1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::SongMinHotttnesss + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "longitude" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Longitude" );
+//                 int extra = param.first.endsWith( "_max" ) ? 1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinLongitude + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first.startsWith( "latitude" ) )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Latitude" );
+//                 int extra = param.first.endsWith( "_max" ) ? 1 : 0;
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::ArtistMinLatitude + extra ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "key" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Key" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Key ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "mode" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Mode" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Mode ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "mood" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Mood" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Mood ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "style" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Style" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::Style ) );
+//                 controls << c;
+//             }
+//             else if ( param.first == "song" )
+//             {
+//                 dyncontrol_ptr c = pl->generator()->createControl( "Song" );
+//                 c->setInput( param.second );
+//                 c->setMatch( QString::number( (int)Echonest::DynamicPlaylist::SongRadioType ) );
+//                 controls << c;
+//             }
+//         }
+//
+//         if ( m == OnDemand )
+//             pl->createNewRevision( uuid(), pl->currentrevision(), type, controls );
+//         else
+//             pl->createNewRevision( uuid(), pl->currentrevision(), type, controls, pl->entries() );
+//
+//         ViewManager::instance()->show( pl );
+//         return pl;
+//     }
 
     return Tomahawk::dynplaylist_ptr();
 }
@@ -1088,7 +1095,7 @@ GlobalActionManager::handlePlayCommand( const QUrl& url )
 
         QPair< QString, QString > pair;
         QString title, artist, album, urlStr;
-        foreach ( pair, url.queryItems() )
+        foreach ( pair, QUrlQuery(url).queryItems() )
         {
             if ( pair.first == "title" )
                 title = pair.second;
@@ -1121,12 +1128,12 @@ GlobalActionManager::handlePlayCommand( const QUrl& url )
 bool
 GlobalActionManager::playSpotify( const QUrl& url )
 {
-    if ( !url.hasQueryItem( "spotifyURI" ) && !url.hasQueryItem( "spotifyURL" ) )
-        return false;
-
-    QString spotifyUrl = url.hasQueryItem( "spotifyURI" ) ? url.queryItemValue( "spotifyURI" ) : url.queryItemValue( "spotifyURL" );
-    SpotifyParser* p = new SpotifyParser( spotifyUrl, this );
-    connect( p, SIGNAL( track( Tomahawk::query_ptr ) ), this, SLOT( playOrQueueNow( Tomahawk::query_ptr ) ) );
+//     if ( !url.hasQueryItem( "spotifyURI" ) && !url.hasQueryItem( "spotifyURL" ) )
+//         return false;
+//
+//     QString spotifyUrl = url.hasQueryItem( "spotifyURI" ) ? url.queryItemValue( "spotifyURI" ) : url.queryItemValue( "spotifyURL" );
+//     SpotifyParser* p = new SpotifyParser( spotifyUrl, this );
+//     connect( p, SIGNAL( track( Tomahawk::query_ptr ) ), this, SLOT( playOrQueueNow( Tomahawk::query_ptr ) ) );
 
     return true;
 }
@@ -1156,13 +1163,13 @@ GlobalActionManager::playOrQueueNow( const query_ptr& q )
 bool
 GlobalActionManager::playRdio( const QUrl& url )
 {
-    if ( !url.hasQueryItem( "rdioURI" ) && !url.hasQueryItem( "rdioURL" ) )
+//     if ( !url.hasQueryItem( "rdioURI" ) && !url.hasQueryItem( "rdioURL" ) )
         return false;
-
+/*
     QString rdioUrl = url.hasQueryItem( "rdioURI" ) ? url.queryItemValue( "spotifyURI" ) : url.queryItemValue( "rdioURL" );
     RdioParser* p = new RdioParser( this );
     p->parse( rdioUrl );
-    connect( p, SIGNAL( track( Tomahawk::query_ptr ) ), this, SLOT( playOrQueueNow( Tomahawk::query_ptr ) ) );
+    connect( p, SIGNAL( track( Tomahawk::query_ptr ) ), this, SLOT( playOrQueueNow( Tomahawk::query_ptr ) ) );*/
 
     return true;
 }
@@ -1183,7 +1190,7 @@ bool GlobalActionManager::handleBookmarkCommand(const QUrl& url)
     {
         QPair< QString, QString > pair;
         QString title, artist, album, urlStr;
-        foreach ( pair, url.queryItems() )
+        foreach ( pair, QUrlQuery(url).queryItems() )
         {
             if ( pair.first == "title" )
                 title = pair.second;

@@ -35,7 +35,7 @@ ENDIF()
 #ENDFOREACH( moddir )
 
 SET( tomahawkSources ${tomahawkSources}
-     web/Api_v1.cpp
+#      web/Api_v1.cpp
 
      AclRegistryImpl.cpp
      ShortcutHandler.cpp
@@ -110,7 +110,7 @@ INCLUDE_DIRECTORIES(
     libtomahawk
     mac
 
-    ${THIRDPARTY_DIR}/qxt/qxtweb-standalone/qxtweb
+#     ${THIRDPARTY_DIR}/qxt/qxtweb-standalone/qxtweb
     ${THIRDPARTY_DIR}/breakpad
 
     ${TAGLIB_INCLUDES}
@@ -154,14 +154,14 @@ INCLUDE(GNUInstallDirs)
 #                ${CMAKE_CURRENT_BINARY_DIR}/TomahawkVersion.h)
 
 # translations
-include( ${CMAKE_SOURCE_DIR}/lang/translations.cmake )
-add_tomahawk_translations(ar bg ca de en es fr ja pl pt_BR ru sv tr zh_CN zh_TW)
+# include( ${CMAKE_SOURCE_DIR}/lang/translations.cmake )
+# add_tomahawk_translations(ar bg ca de en es fr ja pl pt_BR ru sv tr zh_CN zh_TW)
 
 SET( final_src ${final_src} ${tomahawkMoc} ${tomahawkSources} ${trans_outfile})
 
 IF( BUILD_GUI )
     LIST(APPEND tomahawkSources ${tomahawkSourcesGui})
-#     qt4_wrap_ui( tomahawkUI_H ${tomahawkUI} )
+    qt5_wrap_ui( tomahawkUI_H ${tomahawkUI} )
 
     IF( WITH_CRASHREPORTER )
         ADD_SUBDIRECTORY( breakpad/CrashReporter )
@@ -169,7 +169,7 @@ IF( BUILD_GUI )
 ENDIF()
 
 kde4_add_app_icon( tomahawkSources "${CMAKE_SOURCE_DIR}/data/icons/tomahawk-icon-*.png" )
-# qt4_add_resources( RC_SRCS "../resources.qrc" )
+qt5_add_resources( RC_SRCS "../resources.qrc" )
 
 SET( final_src ${final_src} ${tomahawkUI_H} ${tomahawkMoc} ${tomahawkSources} ${RC_SRCS} )
 
@@ -185,6 +185,7 @@ IF( WIN32 )
 ENDIF( WIN32 )
 
 SET_TARGET_PROPERTIES(tomahawk PROPERTIES AUTOMOC TRUE)
+qt5_use_modules(tomahawk Core Widgets Network Sql WebKitWidgets)
 
 MESSAGE( STATUS "OS_SPECIFIC_LINK_LIBRARIES: ${OS_SPECIFIC_LINK_LIBRARIES}" )
 
@@ -207,7 +208,7 @@ TARGET_LINK_LIBRARIES( tomahawk
     ${QT_LIBRARIES}
     ${MAC_EXTRA_LIBS}
 #     ${ECHONEST_LIBRARIES}
-    ${QXTWEB_LIBRARIES}
+#     ${QXTWEB_LIBRARIES}
     ${QJSON_LIBRARIES}
     ${TAGLIB_LIBRARIES}
 )

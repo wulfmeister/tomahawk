@@ -22,7 +22,7 @@
 #include "infosystem/InfoSystem.h"
 #include "DllMacro.h"
 
-#include <QWeakPointer>
+#include <QPointer>
 
 class QNetworkReply;
 
@@ -62,7 +62,7 @@ private:
     void dataError( InfoRequestData );
     void trackListResult( const QStringList& trackNameList, const Tomahawk::InfoSystem::InfoRequestData& requestData );
 
-    QWeakPointer< Tomahawk::Accounts::SpotifyAccount > m_account;
+    QPointer< Tomahawk::Accounts::SpotifyAccount > m_account;
 };
 
 }

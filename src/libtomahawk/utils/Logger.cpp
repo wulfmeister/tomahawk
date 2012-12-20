@@ -82,7 +82,7 @@ log( const char *msg, unsigned int debugLevel, bool toDisk = true )
             logfile << "TSQLQUERY: ";
         #endif
 
-        logfile << QTime::currentTime().toString().toAscii().data() << " [" << QString::number( debugLevel ).toAscii().data() << "]: " << msg << endl;
+        logfile << QTime::currentTime().toString().toLatin1().data() << " [" << QString::number( debugLevel ).toLatin1().data() << "]: " << msg << endl;
         logfile.flush();
     }
 
@@ -97,27 +97,29 @@ log( const char *msg, unsigned int debugLevel, bool toDisk = true )
 
 
 void
-TomahawkLogHandler( QtMsgType type, const char* msg )
+// TomahawkLogHandler( QtMsgType type, const char* msg )
+TomahawkLogHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     static QMutex s_mutex;
 
+    const char* foo = msg.toLatin1().constData();
     QMutexLocker locker( &s_mutex );
     switch( type )
     {
         case QtDebugMsg:
-            log( msg, LOGTHIRDPARTY );
+            log( foo, LOGTHIRDPARTY );
             break;
 
         case QtCriticalMsg:
-            log( msg, 0 );
+            log( foo, 0 );
             break;
 
         case QtWarningMsg:
-            log( msg, 0 );
+            log( foo, 0 );
             break;
 
         case QtFatalMsg:
-            log( msg, 0 );
+            log( foo, 0 );
             break;
     }
 }
@@ -154,7 +156,7 @@ setupLogfile()
     }
 
     logfile.open( logFile().toLocal8Bit(), ios::app );
-    qInstallMsgHandler( TomahawkLogHandler );
+    qInstallMessageHandler( TomahawkLogHandler );
 }
 
 }
@@ -170,6 +172,6 @@ TLog::TLog( unsigned int debugLevel )
 
 TLog::~TLog()
 {
-    log( m_msg.toAscii().data(), m_debugLevel );
+    log( m_msg.toLatin1().data(), m_debugLevel );
 }
 

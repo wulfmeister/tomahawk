@@ -20,12 +20,13 @@
 #ifndef TRACKPROXYMODELPLAYLISTINTERFACE_H
 #define TRACKPROXYMODELPLAYLISTINTERFACE_H
 
-#include <QtGui/QSortFilterProxyModel>
-
 #include "PlaylistInterface.h"
 #include "playlist/PlayableModel.h"
 
 #include "DllMacro.h"
+
+#include <QSortFilterProxyModel>
+#include <QPointer>
 
 class PlayableProxyModel;
 
@@ -66,7 +67,7 @@ signals:
     void nextTrackAvailable();
 
 protected:
-    QWeakPointer< PlayableProxyModel > m_proxyModel;
+    QPointer< PlayableProxyModel > m_proxyModel;
 
     PlaylistModes::RepeatMode m_repeatMode;
     bool m_shuffled;

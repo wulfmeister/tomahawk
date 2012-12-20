@@ -26,7 +26,7 @@
 #include <QLabel>
 #include <QPaintEvent>
 #include <QTimeLine>
-#include <QWeakPointer>
+#include <QPointer>
 
 #include "DllMacro.h"
 
@@ -38,7 +38,7 @@ class DLLEXPORT FadingPixmap : public QLabel
 {
 Q_OBJECT
 
-    static QWeakPointer< TomahawkUtils::SharedTimeLine > stlInstance();
+    static QPointer< TomahawkUtils::SharedTimeLine > stlInstance();
 
 public:
     FadingPixmap( QWidget* parent = 0 );
@@ -63,14 +63,14 @@ private:
     QPixmap m_oldPixmap;
 
     QString m_oldImageMd5;
-    
+
     QList<QPixmap> m_pixmapQueue;
-    
+
     int m_fadePct;
     int m_startFrame;
     bool m_isDefault;
 
-    static QWeakPointer< TomahawkUtils::SharedTimeLine > s_stlInstance;
+    static QPointer< TomahawkUtils::SharedTimeLine > s_stlInstance;
 };
 
 #endif

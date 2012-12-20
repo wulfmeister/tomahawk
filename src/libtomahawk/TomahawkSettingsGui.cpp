@@ -18,7 +18,7 @@
 
 #include "TomahawkSettingsGui.h"
 
-#include <QDesktopServices>
+#include <QStandardPaths>
 
 using namespace Tomahawk;
 
@@ -82,7 +82,7 @@ TomahawkSettingsGui::~TomahawkSettingsGui()
 QString
 TomahawkSettingsGui::storageCacheLocation() const
 {
-    return QDesktopServices::storageLocation( QDesktopServices::CacheLocation );
+    return QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
 }
 
 
@@ -91,7 +91,7 @@ TomahawkSettingsGui::scannerPaths() const
 {
     QString musicLocation;
 
-    musicLocation = QDesktopServices::storageLocation( QDesktopServices::MusicLocation );
+    musicLocation = QStandardPaths::writableLocation( QStandardPaths::MusicLocation );
 
     return value( "scanner/paths", musicLocation ).toStringList();
 }

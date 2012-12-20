@@ -29,14 +29,14 @@
 
 using namespace Tomahawk;
 
-QWeakPointer< TomahawkUtils::SharedTimeLine > PixmapDelegateFader::s_stlInstance = QWeakPointer< TomahawkUtils::SharedTimeLine >();
+QPointer< TomahawkUtils::SharedTimeLine > PixmapDelegateFader::s_stlInstance = QPointer< TomahawkUtils::SharedTimeLine >();
 
 
-QWeakPointer< TomahawkUtils::SharedTimeLine >
+QPointer< TomahawkUtils::SharedTimeLine >
 PixmapDelegateFader::stlInstance()
 {
     if ( s_stlInstance.isNull() )
-        s_stlInstance = QWeakPointer< TomahawkUtils::SharedTimeLine> ( new TomahawkUtils::SharedTimeLine() );
+        s_stlInstance = QPointer< TomahawkUtils::SharedTimeLine> ( new TomahawkUtils::SharedTimeLine() );
 
     return s_stlInstance;
 }

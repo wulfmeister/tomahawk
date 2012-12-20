@@ -21,13 +21,16 @@
 #include "SpotifyAccount.h"
 #include "utils/Closure.h"
 
+#include <QUrlQuery>
+
+
 using namespace Tomahawk;
 using namespace Tomahawk::InfoSystem;
 
 
 SpotifyInfoPlugin::SpotifyInfoPlugin( Accounts::SpotifyAccount* account )
     : InfoPlugin()
-    , m_account( QWeakPointer< Accounts::SpotifyAccount >( account ) )
+    , m_account( QPointer< Accounts::SpotifyAccount >( account ) )
 {
     if ( !m_account.isNull() )
         m_supportedGetTypes << InfoAlbumSongs;
@@ -89,7 +92,9 @@ SpotifyInfoPlugin::notInCacheSlot( InfoStringHash criteria, InfoRequestData requ
         {
             // No running spotify account, use our webservice
             QUrl lookupUrl( "http://ws.spotify.com/search/1/album.json" );
-            lookupUrl.addQueryItem( "q", QString( "%1 %2" ).arg( artist ).arg( album ) );
+            QUrlQuery urlQuery( lookupUrl );
+            urlQuery.addQueryItem( "q", QString( "%1 %2" ).arg( artist ).arg( album ) );
+            lookupUrl.setQuery( urlQuery );
 
             QNetworkReply * reply = TomahawkUtils::nam()->get( QNetworkRequest( lookupUrl ) );
             NewClosure( reply, SIGNAL( finished() ), this, SLOT( albumIdLookupFinished( QNetworkReply*, Tomahawk::InfoSystem::InfoRequestData ) ), reply, requestData );

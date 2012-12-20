@@ -32,10 +32,10 @@ ViewHeader::ViewHeader( QAbstractItemView* parent )
     , m_sigmap( new QSignalMapper( this ) )
     , m_init( false )
 {
-    setResizeMode( QHeaderView::Interactive );
+//     setResizeMode( QHeaderView::Interactive );
     setMinimumSectionSize( 60 );
     setDefaultAlignment( Qt::AlignLeft );
-    setMovable( true );
+//     setMovable( true );
     setStretchLastSection( true );
 
 //    m_menu->addAction( tr( "Resize columns to fit window" ), this, SLOT( onToggleResizeColumns() ) );

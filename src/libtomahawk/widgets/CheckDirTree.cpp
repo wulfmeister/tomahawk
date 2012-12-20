@@ -89,7 +89,7 @@ CheckDirModel::getFileInfoResult()
 void
 CheckDirModel::volumeShowFinished()
 {
-    reset();
+//     reset();
 
 #ifdef Q_OS_MAC
     // Make sure /Volumes is there, if not wait and try again

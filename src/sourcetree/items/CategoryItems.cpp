@@ -21,7 +21,7 @@
 
 #include <QMimeData>
 
-#include <echonest/Playlist.h>
+// #include <echonest/Playlist.h>
 
 #include "DropJob.h"
 #include "TomahawkApp.h"

@@ -34,11 +34,11 @@
 #include "database/DatabaseCommand_CollectionStats.h"
 #include "database/DatabaseResolver.h"
 #include "playlist/dynamic/GeneratorFactory.h"
-#include "playlist/dynamic/echonest/EchonestGenerator.h"
+// #include "playlist/dynamic/echonest/EchonestGenerator.h"
 #include "playlist/dynamic/database/DatabaseGenerator.h"
 #include "playlist/XspfUpdater.h"
 #include "network/Servent.h"
-#include "web/Api_v1.h"
+// #include "web/Api_v1.h"
 #include "SourceList.h"
 #include "ShortcutHandler.h"
 #include "libtomahawk/filemetadata/ScanManager.h"
@@ -47,7 +47,7 @@
 #include "database/LocalCollection.h"
 #include "Pipeline.h"
 #include "DropJob.h"
-#include "EchonestCatalogSynchronizer.h"
+// #include "EchonestCatalogSynchronizer.h"
 
 #include "audio/AudioEngine.h"
 #include "utils/XspfLoader.h"
@@ -223,18 +223,18 @@ TomahawkApp::init()
     // Cause the creation of the nam, but don't need to address it directly, so prevent warning
     Q_UNUSED( TomahawkUtils::nam() );
 
-    m_audioEngine = QWeakPointer<AudioEngine>( new AudioEngine );
+    m_audioEngine = QPointer<AudioEngine>( new AudioEngine );
 
     // init pipeline and resolver factories
     new Pipeline();
 
-    m_servent = QWeakPointer<Servent>( new Servent( this ) );
+    m_servent = QPointer<Servent>( new Servent( this ) );
     connect( m_servent.data(), SIGNAL( ready() ), SLOT( initSIP() ) );
 
     tDebug() << "Init Database.";
     initDatabase();
 
-    m_scanManager = QWeakPointer<ScanManager>( new ScanManager( this ) );
+    m_scanManager = QPointer<ScanManager>( new ScanManager( this ) );
 
 #ifndef ENABLE_HEADLESS
     Pipeline::instance()->addExternalResolverFactory( boost::bind( &QtScriptResolver::factory, _1 ) );
@@ -248,18 +248,18 @@ TomahawkApp::init()
     QByteArray wand = QByteArray::fromBase64( QCoreApplication::applicationName().toLatin1() );
     int length = magic.length(), n2 = wand.length();
     for ( int i=0; i<length; i++ ) magic[i] = magic[i] ^ wand[i%n2];
-    Echonest::Config::instance()->setAPIKey( magic );
+//     Echonest::Config::instance()->setAPIKey( magic );
 
 #ifndef ENABLE_HEADLESS
     tDebug() << "Init Echonest Factory.";
-    GeneratorFactory::registerFactory( "echonest", new EchonestFactory );
+//     GeneratorFactory::registerFactory( "echonest", new EchonestFactory );
 #endif
     tDebug() << "Init Database Factory.";
     GeneratorFactory::registerFactory( "database", new DatabaseFactory );
 
     // Register shortcut handler for this platform
 #ifdef Q_WS_MAC
-    m_shortcutHandler = QWeakPointer<Tomahawk::ShortcutHandler>( new MacShortcutHandler( this ) );
+    m_shortcutHandler = QPointer<Tomahawk::ShortcutHandler>( new MacShortcutHandler( this ) );
     Tomahawk::setShortcutHandler( static_cast<MacShortcutHandler*>( m_shortcutHandler.data() ) );
 
     Tomahawk::setApplicationHandler( this );
@@ -280,15 +280,15 @@ TomahawkApp::init()
     }
 
     tDebug() << "Init InfoSystem.";
-    m_infoSystem = QWeakPointer<Tomahawk::InfoSystem::InfoSystem>( Tomahawk::InfoSystem::InfoSystem::instance() );
+    m_infoSystem = QPointer<Tomahawk::InfoSystem::InfoSystem>( Tomahawk::InfoSystem::InfoSystem::instance() );
 
     tDebug() << "Init AccountManager.";
-    m_accountManager = QWeakPointer< Tomahawk::Accounts::AccountManager >( new Tomahawk::Accounts::AccountManager( this ) );
+    m_accountManager = QPointer< Tomahawk::Accounts::AccountManager >( new Tomahawk::Accounts::AccountManager( this ) );
     connect( m_accountManager.data(), SIGNAL( ready() ), SLOT( accountManagerReady() ) );
 
-    Echonest::Config::instance()->setNetworkAccessManager( TomahawkUtils::nam() );
+//     Echonest::Config::instance()->setNetworkAccessManager( TomahawkUtils::nam() );
 #ifndef ENABLE_HEADLESS
-    EchonestGenerator::setupCatalogs();
+//     EchonestGenerator::setupCatalogs();
 
     if ( !m_headless )
     {
@@ -337,7 +337,7 @@ TomahawkApp::init()
     }
 
     // Set up echonest catalog synchronizer
-    Tomahawk::EchonestCatalogSynchronizer::instance();
+//     Tomahawk::EchonestCatalogSynchronizer::instance();
 
     PlaylistUpdaterInterface::registerUpdaterFactory( new XspfUpdaterFactory );
     PlaylistUpdaterInterface::registerUpdaterFactory( new SpotifyUpdaterFactory );
@@ -371,10 +371,10 @@ TomahawkApp::~TomahawkApp()
 {
     tDebug( LOGVERBOSE ) << "Shutting down Tomahawk...";
 
-    if ( !m_session.isNull() )
-        delete m_session.data();
-    if ( !m_connector.isNull() )
-        delete m_connector.data();
+//     if ( !m_session.isNull() )
+//         delete m_session.data();
+//     if ( !m_connector.isNull() )
+//         delete m_connector.data();
 
     if ( Pipeline::instance() )
         Pipeline::instance()->stop();
@@ -421,7 +421,7 @@ TomahawkApp::instance()
 void
 TomahawkApp::printHelp()
 {
-    #define echo( X ) std::cout << QString( X ).toAscii().data() << "\n"
+    #define echo( X ) std::cout << QString( X ).toLatin1().data() << "\n"
 
     echo( "Usage: " + arguments().at( 0 ) + " [options] [url]" );
     echo( "Options are:" );
@@ -555,7 +555,7 @@ TomahawkApp::initDatabase()
     }
 
     tDebug( LOGEXTRA ) << "Using database:" << dbpath;
-    m_database = QWeakPointer<Database>( new Database( dbpath, this ) );
+    m_database = QPointer<Database>( new Database( dbpath, this ) );
     Pipeline::instance()->databaseReady();
 }
 
@@ -563,43 +563,43 @@ TomahawkApp::initDatabase()
 void
 TomahawkApp::initHTTP()
 {
-    if ( !TomahawkSettings::instance()->httpEnabled() )
-    {
-        tLog() << "Stopping HTTPd, not enabled";
-        if ( !m_session.isNull() )
-            delete m_session.data();
-        if ( !m_connector.isNull() )
-            delete m_connector.data();
-        return;
-    }
-
-    if ( m_session )
-    {
-        tLog() << "HTTPd session already exists, returning";
-        return;
-    }
-
-    m_session = QWeakPointer< QxtHttpSessionManager >( new QxtHttpSessionManager() );
-    m_connector = QWeakPointer< QxtHttpServerConnector >( new QxtHttpServerConnector );
-    if ( m_session.isNull() || m_connector.isNull() )
-    {
-        if ( !m_session.isNull() )
-            delete m_session.data();
-        if ( !m_connector.isNull() )
-            delete m_connector.data();
-        tLog() << "Failed to start HTTPd, could not create object";
-        return;
-    }
-
-    m_session.data()->setPort( 60210 ); //TODO config
-    m_session.data()->setListenInterface( QHostAddress::LocalHost );
-    m_session.data()->setConnector( m_connector.data() );
-
-    Api_v1* api = new Api_v1( m_session.data() );
-    m_session.data()->setStaticContentService( api );
-
-    tLog() << "Starting HTTPd on" << m_session.data()->listenInterface().toString() << m_session.data()->port();
-    m_session.data()->start();
+//     if ( !TomahawkSettings::instance()->httpEnabled() )
+//     {
+//         tLog() << "Stopping HTTPd, not enabled";
+//         if ( !m_session.isNull() )
+//             delete m_session.data();
+//         if ( !m_connector.isNull() )
+//             delete m_connector.data();
+//         return;
+//     }
+//
+//     if ( m_session )
+//     {
+//         tLog() << "HTTPd session already exists, returning";
+//         return;
+//     }
+//
+//     m_session = QPointer< QxtHttpSessionManager >( new QxtHttpSessionManager() );
+//     m_connector = QPointer< QxtHttpServerConnector >( new QxtHttpServerConnector );
+//     if ( m_session.isNull() || m_connector.isNull() )
+//     {
+//         if ( !m_session.isNull() )
+//             delete m_session.data();
+//         if ( !m_connector.isNull() )
+//             delete m_connector.data();
+//         tLog() << "Failed to start HTTPd, could not create object";
+//         return;
+//     }
+//
+//     m_session.data()->setPort( 60210 ); //TODO config
+//     m_session.data()->setListenInterface( QHostAddress::LocalHost );
+//     m_session.data()->setConnector( m_connector.data() );
+//
+//     Api_v1* api = new Api_v1( m_session.data() );
+//     m_session.data()->setStaticContentService( api );
+//
+//     tLog() << "Starting HTTPd on" << m_session.data()->listenInterface().toString() << m_session.data()->port();
+//     m_session.data()->start();
 }
 
 
@@ -679,8 +679,8 @@ TomahawkApp::spotifyApiCheckFinished()
 void
 TomahawkApp::accountManagerReady()
 {
-    Tomahawk::Accounts::LastFmAccountFactory* lastfmFactory = new Tomahawk::Accounts::LastFmAccountFactory();
-    m_accountManager.data()->addAccountFactory( lastfmFactory );
+//     Tomahawk::Accounts::LastFmAccountFactory* lastfmFactory = new Tomahawk::Accounts::LastFmAccountFactory();
+//     m_accountManager.data()->addAccountFactory( lastfmFactory );
 
     Tomahawk::Accounts::SpotifyAccountFactory* spotifyFactory = new Tomahawk::Accounts::SpotifyAccountFactory;
     m_accountManager.data()->addAccountFactory( spotifyFactory );

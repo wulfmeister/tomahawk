@@ -39,6 +39,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QMimeData>
 
 
 #define TREEVIEW_INDENT_ADD 12

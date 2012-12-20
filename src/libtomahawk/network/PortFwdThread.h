@@ -1,5 +1,5 @@
 /* === This file is part of Tomahawk Player - <http://tomahawk-player.org> ===
- * 
+ *
  *   Copyright 2010-2011, Christian Muehlhaeuser <muesli@tomahawk-player.org>
  *
  *   Tomahawk is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QHostAddress>
-#include <QWeakPointer>
+#include <QPointer>
 
 class Portfwd;
 
@@ -37,7 +37,7 @@ public:
     unsigned int externalPort() const { return m_externalPort; }
 
     void unregister();
-    
+
 signals:
     void externalAddressDetected( QHostAddress ha, unsigned int port );
 
@@ -59,16 +59,16 @@ public:
     explicit PortFwdThread( unsigned int port );
     ~PortFwdThread();
 
-    QWeakPointer< PortFwdWorker > worker() const;
+    QPointer< PortFwdWorker > worker() const;
 
 signals:
     void externalAddressDetected( QHostAddress ha, unsigned int port );
-    
+
 protected:
     void run();
 
 private:
-    QWeakPointer< PortFwdWorker > m_worker;
+    QPointer< PortFwdWorker > m_worker;
     unsigned int m_port;
 };
 

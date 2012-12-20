@@ -70,7 +70,7 @@ AudioEngine::AudioEngine()
     s_instance = this;
     tDebug() << "Init AudioEngine";
 
-    qRegisterMetaType< AudioErrorCode >("AudioErrorCode");
+//     qRegisterMetaType< AudioErrorCode >("AudioErrorCode");
     qRegisterMetaType< AudioState >("AudioState");
 
     m_mediaObject = new Phonon::MediaObject( this );
@@ -469,7 +469,7 @@ AudioEngine::loadTrack( const Tomahawk::result_ptr& result )
                     if ( m_currentTrack->url().contains( "?" ) )
                     {
                         furl = QUrl( m_currentTrack->url().left( m_currentTrack->url().indexOf( '?' ) ) );
-                        furl.setEncodedQuery( QString( m_currentTrack->url().mid( m_currentTrack->url().indexOf( '?' ) + 1 ) ).toLocal8Bit() );
+                        furl.setQuery( QString( m_currentTrack->url().mid( m_currentTrack->url().indexOf( '?' ) + 1 ) ) );
                     }
                     m_mediaObject->setCurrentSource( furl );
                 }

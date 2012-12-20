@@ -1,5 +1,5 @@
 /* === This file is part of Tomahawk Player - <http://tomahawk-player.org> ===
- * 
+ *
  *   Copyright 2010-2011, Christian Muehlhaeuser <muesli@tomahawk-player.org>
  *
  *   Tomahawk is free software: you can redistribute it and/or modify
@@ -19,11 +19,12 @@
 #ifndef WIDGET_DRAG_FILTER_H
 #define WIDGET_DRAG_FILTER_H
 
+#include "DllMacro.h"
+
 #include <QObject>
 #include <QPoint>
 #include <QWidget>
-
-#include "DllMacro.h"
+#include <QPointer>
 
 class QMouseEvent;
 class QEvent;
@@ -36,13 +37,13 @@ class DLLEXPORT WidgetDragFilter : public QObject
 {
     Q_OBJECT
 public:
-    explicit WidgetDragFilter(QObject* parent = 0);  
+    explicit WidgetDragFilter(QObject* parent = 0);
 
     virtual bool eventFilter(QObject* , QEvent* );
 private:
     bool canDrag( QObject* obj, QMouseEvent* ev ) const;
-    
-    QWeakPointer<QWidget> m_target; // in case it's deleted under us
+
+    QPointer<QWidget> m_target; // in case it's deleted under us
     QPoint m_dragPoint;
     bool m_dragStarted;
 };

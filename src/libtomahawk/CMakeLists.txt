@@ -210,9 +210,9 @@ set( libSources
     accounts/spotify/SpotifyPlaylistUpdater.cpp
     accounts/spotify/SpotifyInfoPlugin.cpp
 
-    accounts/lastfm/LastFmAccount.cpp
-    accounts/lastfm/LastFmConfig.cpp
-    accounts/lastfm/LastFmInfoPlugin.cpp
+#     accounts/lastfm/LastFmAccount.cpp
+#     accounts/lastfm/LastFmConfig.cpp
+#     accounts/lastfm/LastFmInfoPlugin.cpp
 
     sip/SipPlugin.cpp
     sip/SipHandler.cpp
@@ -369,14 +369,14 @@ IF(LIBATTICA_FOUND)
     SET( libGuiSources ${libGuiSources} AtticaManager.cpp )
     SET( libGuiHeaders ${libGuiHeaders} AtticaManager.h )
     INCLUDE_DIRECTORIES( ${LIBATTICA_INCLUDE_DIR} )
-    SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${LIBATTICA_LIBRARIES} ${QuaZip_LIBRARIES} )
+    LIST(APPEND LINK_LIBRARIES ${LIBATTICA_LIBRARIES} ${QuaZip_LIBRARIES} )
 ENDIF(LIBATTICA_FOUND)
 
 IF( UNIX AND NOT APPLE )
     IF( BUILD_GUI AND X11_FOUND )
         INCLUDE_DIRECTORIES( ${THIRDPARTY_DIR}/libqnetwm )
         SET( libSources ${libSources} ${THIRDPARTY_DIR}/libqnetwm/libqnetwm/netwm.cpp )
-        SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${X11_LIBRARIES} )
+        LIST(APPEND LINK_LIBRARIES ${X11_LIBRARIES} )
     ENDIF()
 ENDIF( UNIX AND NOT APPLE )
 
@@ -429,7 +429,7 @@ ELSE( APPLE )
 ENDIF( APPLE )
 
 IF(LIBLASTFM_FOUND)
-    SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${LIBLASTFM_LIBRARIES} )
+    LIST(APPEND LINK_LIBRARIES ${LIBLASTFM_LIBRARIES} )
 ENDIF(LIBLASTFM_FOUND)
 
 IF(BUILD_GUI)
@@ -442,14 +442,14 @@ SET( libSources ${libSources} ${libUI_H} )
 
 ADD_LIBRARY( tomahawklib SHARED ${libSources})
 set_target_properties(tomahawklib PROPERTIES AUTOMOC TRUE)
-qt5_use_modules(tomahawklib Widgets Network Sql WebKitWidgets)
+qt5_use_modules(tomahawklib Widgets Network Sql WebKitWidgets Concurrent Xml UiTools Svg)
 
 IF(QCA2_FOUND)
-    SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${QCA2_LIBRARIES} )
+    LIST(APPEND LINK_LIBRARIES ${QCA2_LIBRARIES} )
 ENDIF(QCA2_FOUND)
 
 IF( UNIX AND NOT APPLE )
-    SET( LINK_LIBRARIES ${LINK_LIBRARIES} ${QT_QTDBUS_LIBRARY} )
+    LIST(APPEND LINK_LIBRARIES ${QT_QTDBUS_LIBRARY} )
 ENDIF( UNIX AND NOT APPLE )
 
 TARGET_LINK_LIBRARIES( tomahawklib

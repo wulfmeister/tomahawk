@@ -123,7 +123,7 @@ Servent::startListening( QHostAddress ha, bool upnp, int port )
     }
 
     TomahawkSettings::ExternalAddressMode mode = TomahawkSettings::instance()->externalAddressMode();
-    
+
     tLog() << "Servent listening on port" << m_port << "- servent thread:" << thread()
            << "- address mode:" << (int)( mode );
 
@@ -149,7 +149,7 @@ Servent::startListening( QHostAddress ha, bool upnp, int port )
             }
             // TODO check if we have a public/internet IP on this machine directly
             tLog() << "External address mode set to upnp...";
-            m_portfwd = QWeakPointer< PortFwdThread >( new PortFwdThread( m_port ) );
+            m_portfwd = QPointer< PortFwdThread >( new PortFwdThread( m_port ) );
             Q_ASSERT( m_portfwd );
             connect( m_portfwd.data(), SIGNAL( externalAddressDetected( QHostAddress, unsigned int ) ),
                                   SLOT( setExternalAddress( QHostAddress, unsigned int ) ) );
@@ -242,7 +242,7 @@ Servent::setExternalAddress( QHostAddress ha, unsigned int port )
 void
 Servent::registerOffer( const QString& key, Connection* conn )
 {
-    m_offers[key] = QWeakPointer<Connection>(conn);
+    m_offers[key] = QPointer<Connection>(conn);
 }
 
 
@@ -303,7 +303,7 @@ void
 Servent::readyRead()
 {
     Q_ASSERT( this->thread() == QThread::currentThread() );
-    QWeakPointer< QTcpSocketExtra > sock = (QTcpSocketExtra*)sender();
+    QPointer< QTcpSocketExtra > sock = (QTcpSocketExtra*)sender();
 
     if( sock.isNull() || sock.data()->_disowned )
     {
@@ -397,8 +397,8 @@ Servent::readyRead()
             tLog() << "Socket has become invalid, possibly took too long to make an ACL decision, key:" << key << nodeid;
             goto closeconnection;
         }
-        tDebug( LOGVERBOSE ) << "claimOffer OK:" << key << nodeid;        
-        
+        tDebug( LOGVERBOSE ) << "claimOffer OK:" << key << nodeid;
+
         m_connectedNodes << nodeid;
         if( !nodeid.isEmpty() )
             conn->setId( nodeid );
@@ -466,7 +466,7 @@ Servent::socketConnected()
         tDebug( LOGVERBOSE ) << Q_FUNC_INFO << "Socket's connection was null, could have timed out or been given an invalid address";
         return;
     }
-    
+
     Connection* conn = sock->_conn.data();
     handoverSocket( conn, sock );
 }
@@ -666,7 +666,7 @@ Servent::claimOffer( ControlConnection* cc, const QString &nodeid, const QString
 
     if( m_offers.contains( key ) )
     {
-        QWeakPointer<Connection> conn = m_offers.value( key );
+        QPointer<Connection> conn = m_offers.value( key );
         if( conn.isNull() )
         {
             // This can happen if it's a streamconnection, but the audioengine has
@@ -776,7 +776,7 @@ Servent::isIPWhitelisted( QHostAddress ip )
     tDebug( LOGVERBOSE ) << Q_FUNC_INFO << "Performing checks against ip" << ip.toString();
     typedef QPair< QHostAddress, int > range;
     QList< range > subnetEntries;
-    
+
     QList< QNetworkInterface > networkInterfaces = QNetworkInterface::allInterfaces();
     foreach( QNetworkInterface interface, networkInterfaces )
     {

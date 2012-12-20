@@ -32,8 +32,8 @@
     #include <lastfm/ws.h>
 #endif
 
-#include <quazip.h>
-#include <quazipfile.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
 
 
 #include <QNetworkConfiguration>
@@ -777,71 +777,71 @@ crash()
 bool
 verifyFile( const QString& filePath, const QString& signature )
 {
-    QCA::Initializer init;
-
-    if ( !QCA::isSupported( "sha1" ) )
-    {
-        qWarning() << "SHA1 not supported by QCA, aborting.";
-        return false;
-    }
-
-    // The signature for the resolver.zip was created like so:
-    // openssl dgst -sha1 -binary < "#{tarball}" | openssl dgst -dss1 -sign "#{ARGV[2]}" | openssl enc -base64
-    // which means we need to decode it with QCA's DSA public key signature verification tools
-    // The input data is:
-    // file -> SHA1 binary format -> DSS1/DSA signed -> base64 encoded.
-
-    // Step 1: Load the public key
-    // Public key is in :/data/misc/tomahawk_pubkey.pem
-    QFile f( ":/data/misc/tomahawk_pubkey.pem" );
-    if ( !f.open( QIODevice::ReadOnly ) )
-    {
-        qWarning() << "Unable to read public key from resources!";
-        return false;
-    }
-
-    const QString pubkeyData = QString::fromUtf8( f.readAll() );
-    QCA::ConvertResult conversionResult;
-    QCA::PublicKey publicKey = QCA::PublicKey::fromPEM( pubkeyData, &conversionResult );
-    if ( QCA::ConvertGood != conversionResult)
-    {
-        qWarning() << "Public key reading/loading failed! Tried to load public key:" << pubkeyData;
-        return false;
-    }
-
-    if ( !publicKey.canVerify() )
-    {
-        qWarning() << "Loaded Tomahawk public key but cannot use it to verify! What is up....";
-        return false;
-    }
-
-    // Step 2: Get the SHA1 of the file contents
-    QFile toVerify( filePath );
-    if ( !toVerify.exists() || !toVerify.open( QIODevice::ReadOnly ) )
-    {
-        qWarning() << "Failed to open file we are trying to verify!" << filePath;
-        return false;
-    }
-
-    const QByteArray fileHashData = QCA::Hash( "sha1" ).hash( toVerify.readAll() ).toByteArray();
-    toVerify.close();
-
-    // Step 3: Base64 decode the signature
-    QCA::Base64 decoder( QCA::Decode );
-    const QByteArray decodedSignature = decoder.decode( QCA::SecureArray( signature.trimmed().toUtf8() ) ).toByteArray();
-    if ( decodedSignature.isEmpty() )
-    {
-        qWarning() << "Got empty signature after we tried to decode it from Base64:" << signature.trimmed().toUtf8() << decodedSignature.toBase64();
-        return false;
-    }
-
-    // Step 4: Do the actual verifying!
-    const bool result = publicKey.verifyMessage( fileHashData, decodedSignature, QCA::EMSA1_SHA1, QCA::DERSequence );
-    if ( !result )
-    {
-        qWarning() << "File" << filePath << "FAILED VERIFICATION against our input signature!";
-        return false;
-    }
+//     QCA::Initializer init;
+//
+//     if ( !QCA::isSupported( "sha1" ) )
+//     {
+//         qWarning() << "SHA1 not supported by QCA, aborting.";
+//         return false;
+//     }
+//
+//     // The signature for the resolver.zip was created like so:
+//     // openssl dgst -sha1 -binary < "#{tarball}" | openssl dgst -dss1 -sign "#{ARGV[2]}" | openssl enc -base64
+//     // which means we need to decode it with QCA's DSA public key signature verification tools
+//     // The input data is:
+//     // file -> SHA1 binary format -> DSS1/DSA signed -> base64 encoded.
+//
+//     // Step 1: Load the public key
+//     // Public key is in :/data/misc/tomahawk_pubkey.pem
+//     QFile f( ":/data/misc/tomahawk_pubkey.pem" );
+//     if ( !f.open( QIODevice::ReadOnly ) )
+//     {
+//         qWarning() << "Unable to read public key from resources!";
+//         return false;
+//     }
+//
+//     const QString pubkeyData = QString::fromUtf8( f.readAll() );
+//     QCA::ConvertResult conversionResult;
+//     QCA::PublicKey publicKey = QCA::PublicKey::fromPEM( pubkeyData, &conversionResult );
+//     if ( QCA::ConvertGood != conversionResult)
+//     {
+//         qWarning() << "Public key reading/loading failed! Tried to load public key:" << pubkeyData;
+//         return false;
+//     }
+//
+//     if ( !publicKey.canVerify() )
+//     {
+//         qWarning() << "Loaded Tomahawk public key but cannot use it to verify! What is up....";
+//         return false;
+//     }
+//
+//     // Step 2: Get the SHA1 of the file contents
+//     QFile toVerify( filePath );
+//     if ( !toVerify.exists() || !toVerify.open( QIODevice::ReadOnly ) )
+//     {
+//         qWarning() << "Failed to open file we are trying to verify!" << filePath;
+//         return false;
+//     }
+//
+//     const QByteArray fileHashData = QCA::Hash( "sha1" ).hash( toVerify.readAll() ).toByteArray();
+//     toVerify.close();
+//
+//     // Step 3: Base64 decode the signature
+//     QCA::Base64 decoder( QCA::Decode );
+//     const QByteArray decodedSignature = decoder.decode( QCA::SecureArray( signature.trimmed().toUtf8() ) ).toByteArray();
+//     if ( decodedSignature.isEmpty() )
+//     {
+//         qWarning() << "Got empty signature after we tried to decode it from Base64:" << signature.trimmed().toUtf8() << decodedSignature.toBase64();
+//         return false;
+//     }
+//
+//     // Step 4: Do the actual verifying!
+//     const bool result = publicKey.verifyMessage( fileHashData, decodedSignature, QCA::EMSA1_SHA1, QCA::DERSequence );
+//     if ( !result )
+//     {
+//         qWarning() << "File" << filePath << "FAILED VERIFICATION against our input signature!";
+//         return false;
+//     }
 
     tDebug( LOGVERBOSE ) << "Successfully verified signature of downloaded file:" << filePath;
 

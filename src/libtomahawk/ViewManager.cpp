@@ -782,7 +782,7 @@ ViewManager::currentPage() const
 Tomahawk::playlist_ptr
 ViewManager::playlistForInterface( Tomahawk::playlistinterface_ptr interface ) const
 {
-    foreach ( QWeakPointer<FlexibleView> view, m_playlistViews.values() )
+    foreach ( QPointer<FlexibleView> view, m_playlistViews.values() )
     {
         if ( !view.isNull() && view.data()->playlistInterface() == interface )
         {
@@ -797,7 +797,7 @@ ViewManager::playlistForInterface( Tomahawk::playlistinterface_ptr interface ) c
 Tomahawk::dynplaylist_ptr
 ViewManager::dynamicPlaylistForInterface( Tomahawk::playlistinterface_ptr interface ) const
 {
-    foreach ( QWeakPointer<DynamicWidget> view, m_dynamicWidgets.values() )
+    foreach ( QPointer<DynamicWidget> view, m_dynamicWidgets.values() )
     {
         if ( !view.isNull() && view.data()->playlistInterface() == interface )
         {

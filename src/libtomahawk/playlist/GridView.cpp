@@ -19,12 +19,6 @@
 
 #include "GridView.h"
 
-#include <QHeaderView>
-#include <QKeyEvent>
-#include <QPainter>
-#include <QScrollBar>
-#include <qmath.h>
-
 #include "audio/AudioEngine.h"
 #include "context/ContextWidget.h"
 #include "TomahawkSettings.h"
@@ -42,6 +36,13 @@
 #include "utils/Logger.h"
 #include "utils/AnimatedSpinner.h"
 #include "utils/TomahawkUtilsGui.h"
+
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QPainter>
+#include <QScrollBar>
+#include <QDrag>
+#include <qmath.h>
 
 #define SCROLL_TIMEOUT 280
 

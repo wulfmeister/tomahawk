@@ -28,7 +28,7 @@
 #include <QObject>
 #include <QTimeLine>
 #include <QQueue>
-#include <QWeakPointer>
+#include <QPointer>
 
 namespace Tomahawk
 {
@@ -43,15 +43,15 @@ class PixmapDelegateFader : public QObject
 {
     Q_OBJECT
 
-    static QWeakPointer< TomahawkUtils::SharedTimeLine > stlInstance();
-    
+    static QPointer< TomahawkUtils::SharedTimeLine > stlInstance();
+
 public:
     PixmapDelegateFader( const artist_ptr& artist, const QSize& size, TomahawkUtils::ImageMode mode = TomahawkUtils::Original, bool forceLoad = true );
     PixmapDelegateFader( const album_ptr& album, const QSize& size, TomahawkUtils::ImageMode mode = TomahawkUtils::Original, bool forceLoad = true );
     PixmapDelegateFader( const query_ptr& track, const QSize& size, TomahawkUtils::ImageMode mode = TomahawkUtils::Original, bool forceLoad = true );
 
     virtual ~PixmapDelegateFader();
-    
+
     QSize size() const { return m_size; }
     QPixmap currentPixmap() const;
 
@@ -83,12 +83,12 @@ private:
     float m_fadePct;
     QString m_oldImageMd5;
     bool m_defaultImage;
-    
+
     QQueue<QPixmap> m_pixmapQueue;
-    
+
     QPixmap m_currentReference, m_oldReference, m_current;
 
-    static QWeakPointer< TomahawkUtils::SharedTimeLine > s_stlInstance;
+    static QPointer< TomahawkUtils::SharedTimeLine > s_stlInstance;
 };
 
 }

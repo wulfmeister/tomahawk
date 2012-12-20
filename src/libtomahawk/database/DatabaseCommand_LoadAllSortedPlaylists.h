@@ -61,5 +61,5 @@ private:
     DatabaseCommand_LoadAllPlaylists::SortAscDesc m_sortAscDesc;
 };
 
-Q_DECLARE_METATYPE(QList<DatabaseCommand_LoadAllSortedPlaylists::SourcePlaylistPair>)
+// Q_DECLARE_METATYPE(QList<DatabaseCommand_LoadAllSortedPlaylists::SourcePlaylistPair>)
 #endif // DATABASECOMMAND_LOADALLSORTEDPLAYLISTS_H

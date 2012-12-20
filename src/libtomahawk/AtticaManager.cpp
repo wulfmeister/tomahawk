@@ -24,6 +24,12 @@
 #include "Source.h"
 #include "config.h"
 
+#include "utils/Logger.h"
+#include "accounts/ResolverAccount.h"
+#include "accounts/AccountManager.h"
+#include "utils/BinaryInstallerHelper.h"
+#include "utils/Closure.h"
+
 #include <attica/downloaditem.h>
 
 #include <QCoreApplication>
@@ -34,12 +40,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
-
-#include "utils/Logger.h"
-#include "accounts/ResolverAccount.h"
-#include "accounts/AccountManager.h"
-#include "utils/BinaryInstallerHelper.h"
-#include "utils/Closure.h"
+#include <QUrlQuery>
 
 using namespace Attica;
 
@@ -546,7 +547,10 @@ void AtticaManager::doInstallResolver( const Content& resolver, bool autoCreate,
 
 //    ItemJob< DownloadItem >* job = m_resolverProvider.downloadLink( resolver.id() );
     QUrl url( QString( "%1/resolvers/v1/content/download/%2/1" ).arg( hostname() ).arg( resolver.id() ) );
-    url.addQueryItem( "tomahawkversion", TomahawkUtils::appFriendlyVersion() );
+
+    QUrlQuery urlQuery( url );
+    urlQuery.addQueryItem( "tomahawkversion", TomahawkUtils::appFriendlyVersion() );
+    url.setQuery( urlQuery );
     QNetworkReply* r = TomahawkUtils::nam()->get( QNetworkRequest( url ) );
     NewClosure( r, SIGNAL( finished() ), this, SLOT( resolverDownloadFinished( QNetworkReply* ) ), r );
     r->setProperty( "resolverId", resolver.id() );

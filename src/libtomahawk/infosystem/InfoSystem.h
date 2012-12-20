@@ -28,7 +28,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QtDebug>
 #include <QtCore/QMap>
-#include <QtCore/QWeakPointer>
+#include <QtCore/QPointer>
 #include <QtCore/QSet>
 #include <QtCore/QLinkedList>
 #include <QtCore/QUrl>
@@ -152,7 +152,7 @@ public:
     InfoSystemCache* cache() const;
 
 private:
-    QWeakPointer< InfoSystemCache > m_cache;
+    QPointer< InfoSystemCache > m_cache;
 };
 
 
@@ -168,7 +168,7 @@ public:
     InfoSystemWorker* worker() const;
 
 private:
-    QWeakPointer< InfoSystemWorker > m_worker;
+    QPointer< InfoSystemWorker > m_worker;
 };
 
 
@@ -188,7 +188,7 @@ public:
     bool pushInfo( InfoPushData pushData );
     bool pushInfo( const QString &caller, const InfoTypeMap &input, const PushInfoFlags pushFlags );
 
-    QWeakPointer< QThread > workerThread() const;
+    QPointer< QThread > workerThread() const;
 
 public slots:
     // InfoSystem takes ownership of InfoPlugins
