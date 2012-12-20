@@ -85,9 +85,9 @@ set( libGuiSources
     playlist/dynamic/DynamicPlaylist.cpp
     playlist/dynamic/DynamicView.cpp
     playlist/dynamic/DynamicModel.cpp
-#     playlist/dynamic/echonest/EchonestGenerator.cpp
-#     playlist/dynamic/echonest/EchonestControl.cpp
-#     playlist/dynamic/echonest/EchonestSteerer.cpp
+    playlist/dynamic/echonest/EchonestGenerator.cpp
+    playlist/dynamic/echonest/EchonestControl.cpp
+    playlist/dynamic/echonest/EchonestSteerer.cpp
     playlist/dynamic/widgets/DynamicWidget.cpp
     playlist/dynamic/widgets/DynamicControlWrapper.cpp
     playlist/dynamic/widgets/DynamicControlList.cpp
@@ -193,7 +193,7 @@ set( libSources
     SourcePlaylistInterface.cpp
     PlaylistInterface.cpp
 
-#     EchonestCatalogSynchronizer.cpp
+    EchonestCatalogSynchronizer.cpp
 
     accounts/AccountManager.cpp
     accounts/Account.cpp
@@ -351,7 +351,7 @@ include_directories(
 
     ${QT_INCLUDE_DIR}
     ${QJSON_INCLUDE_DIR}
-#     ${ECHONEST_INCLUDE_DIR}
+    ${ECHONEST_INCLUDE_DIR}
 #     ${LIBLASTFM_INCLUDE_DIRS}
     ${CLUCENE_INCLUDE_DIRS}
     ${PHONON_INCLUDES}
@@ -461,7 +461,7 @@ TARGET_LINK_LIBRARIES( tomahawklib
     ${PHONON_LIBS}
     ${TAGLIB_LIBRARIES}
     ${CLUCENE_LIBRARIES}
-#     ${ECHONEST_LIBRARIES}
+    ${ECHONEST_LIBRARIES}
     ${QT_QTSQL_LIBRARY}
     ${QT_QTUITOOLS_LIBRARY}
     ${QT_QTGUI_LIBRARY}
