@@ -104,6 +104,7 @@ INCLUDE( MacroLogFeature )
 # macro_log_feature(QT4_FOUND "Qt" "A cross-platform application and UI framework" "http://qt.nokia.com" TRUE "" "If you see this, although libqt4-devel is installed, check whether the \n     qtwebkit-devel package and whatever contains QtUiTools is installed too")
 
 find_package(Qt5Core)
+find_package(Qt5Widgets)
 
 macro_optional_find_package(Phonon 4.5.0)
 macro_log_feature(PHONON_FOUND "Phonon" "The Phonon multimedia library" "http://phonon.kde.org" TRUE "" "")

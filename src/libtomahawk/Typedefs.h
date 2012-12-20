@@ -28,7 +28,7 @@
 
 //template <typename T> class QSharedPointer;
 
-class QNetworkReply;
+#include <QNetworkReply>
 
 namespace Tomahawk
 {

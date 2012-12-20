@@ -436,13 +436,13 @@ IF(BUILD_GUI)
     LIST(APPEND libSources ${libGuiSources} )
 ENDIF()
 
-# qt4_wrap_ui( libUI_H ${libUI} )
+qt5_wrap_ui( libUI_H ${libUI} )
 
 SET( libSources ${libSources} ${libUI_H} )
 
 ADD_LIBRARY( tomahawklib SHARED ${libSources})
 set_target_properties(tomahawklib PROPERTIES AUTOMOC TRUE)
-qt5_use_modules(tomahawklib Widgets Network Sql)
+qt5_use_modules(tomahawklib Widgets Network Sql WebKitWidgets)
 
 IF(QCA2_FOUND)
     SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${QCA2_LIBRARIES} )

@@ -31,7 +31,7 @@
 #include "DllMacro.h"
 
 class PlayableItem;
-class QStyleOptionViewItemV4;
+class QStyleOptionViewItem;
 class QPainter;
 class QPixmap;
 class QLayout;
@@ -63,7 +63,7 @@ namespace TomahawkUtils
     DLLEXPORT int defaultFontHeight();
     DLLEXPORT QSize defaultIconSize();
 
-    DLLEXPORT void prepareStyleOption( QStyleOptionViewItemV4* option, const QModelIndex& index, PlayableItem* item );
+    DLLEXPORT void prepareStyleOption( QStyleOptionViewItem* option, const QModelIndex& index, PlayableItem* item );
 
     DLLEXPORT void drawRoundedButton( QPainter* painter, const QRect& btnRect, const QColor& color, const QColor &gradient1bottom = QColor(), const QColor& gradient2top = QColor(), const QColor& gradient2bottom = QColor() );
     DLLEXPORT void styleScrollBar( QScrollBar* scrollBar );

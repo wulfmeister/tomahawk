@@ -142,6 +142,6 @@ private:
 
 };
 
-Q_DECLARE_METATYPE( DatabaseCommand_LoadSocialActions::TrackActions )
+// Q_DECLARE_METATYPE( DatabaseCommand_LoadSocialActions::TrackActions )
 
 #endif // DATABASECOMMAND_LOADSOCIALACTIONS_H

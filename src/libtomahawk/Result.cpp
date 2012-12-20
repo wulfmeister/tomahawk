@@ -384,7 +384,7 @@ Result::resolvedBy() const
 void
 Result::setResolvedBy( Tomahawk::Resolver* resolver )
 {
-    m_resolvedBy = QWeakPointer< Tomahawk::Resolver >( resolver );
+    m_resolvedBy = QPointer< Tomahawk::Resolver >( resolver );
 }
 
 

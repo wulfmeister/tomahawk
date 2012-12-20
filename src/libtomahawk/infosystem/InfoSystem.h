@@ -20,6 +20,10 @@
 #ifndef TOMAHAWK_INFOSYSTEM_H
 #define TOMAHAWK_INFOSYSTEM_H
 
+#include "DllMacro.h"
+#include "utils/TomahawkUtils.h"
+#include "Typedefs.h"
+
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QObject>
 #include <QtCore/QtDebug>
@@ -31,10 +35,6 @@
 #include <QtCore/QVariant>
 #include <QtCore/QThread>
 #include <QtCore/QStringList>
-
-#include "DllMacro.h"
-#include "utils/TomahawkUtils.h"
-#include "Typedefs.h"
 
 class QNetworkAccessManager;
 
@@ -68,7 +68,6 @@ struct DLLEXPORT InfoRequestData {
 private:
     void init( const QString& callr, const InfoType typ, const QVariant& inputvar, const QVariantMap& custom);
 };
-
 
 struct InfoPushData {
     QString caller;
@@ -244,6 +243,7 @@ Q_DECLARE_METATYPE( Tomahawk::InfoSystem::InfoStringHash );
 Q_DECLARE_METATYPE( Tomahawk::InfoSystem::PushInfoPair );
 Q_DECLARE_METATYPE( Tomahawk::InfoSystem::PushInfoFlags );
 Q_DECLARE_METATYPE( Tomahawk::InfoSystem::InfoType );
+#include "InfoSystemCache.h"
 Q_DECLARE_METATYPE( Tomahawk::InfoSystem::InfoSystemCache* );
 Q_DECLARE_METATYPE( QList< Tomahawk::InfoSystem::InfoStringHash > );
 Q_DECLARE_METATYPE( Tomahawk::InfoSystem::InfoPluginPtr );
