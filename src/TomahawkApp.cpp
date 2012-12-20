@@ -34,7 +34,7 @@
 #include "database/DatabaseCommand_CollectionStats.h"
 #include "database/DatabaseResolver.h"
 #include "playlist/dynamic/GeneratorFactory.h"
-// #include "playlist/dynamic/echonest/EchonestGenerator.h"
+#include "playlist/dynamic/echonest/EchonestGenerator.h"
 #include "playlist/dynamic/database/DatabaseGenerator.h"
 #include "playlist/XspfUpdater.h"
 #include "network/Servent.h"
@@ -47,7 +47,7 @@
 #include "database/LocalCollection.h"
 #include "Pipeline.h"
 #include "DropJob.h"
-// #include "EchonestCatalogSynchronizer.h"
+#include "EchonestCatalogSynchronizer.h"
 
 #include "audio/AudioEngine.h"
 #include "utils/XspfLoader.h"
@@ -248,11 +248,11 @@ TomahawkApp::init()
     QByteArray wand = QByteArray::fromBase64( QCoreApplication::applicationName().toLatin1() );
     int length = magic.length(), n2 = wand.length();
     for ( int i=0; i<length; i++ ) magic[i] = magic[i] ^ wand[i%n2];
-//     Echonest::Config::instance()->setAPIKey( magic );
+    Echonest::Config::instance()->setAPIKey( magic );
 
 #ifndef ENABLE_HEADLESS
     tDebug() << "Init Echonest Factory.";
-//     GeneratorFactory::registerFactory( "echonest", new EchonestFactory );
+    GeneratorFactory::registerFactory( "echonest", new EchonestFactory );
 #endif
     tDebug() << "Init Database Factory.";
     GeneratorFactory::registerFactory( "database", new DatabaseFactory );
@@ -286,9 +286,9 @@ TomahawkApp::init()
     m_accountManager = QPointer< Tomahawk::Accounts::AccountManager >( new Tomahawk::Accounts::AccountManager( this ) );
     connect( m_accountManager.data(), SIGNAL( ready() ), SLOT( accountManagerReady() ) );
 
-//     Echonest::Config::instance()->setNetworkAccessManager( TomahawkUtils::nam() );
+    Echonest::Config::instance()->setNetworkAccessManager( TomahawkUtils::nam() );
 #ifndef ENABLE_HEADLESS
-//     EchonestGenerator::setupCatalogs();
+    EchonestGenerator::setupCatalogs();
 
     if ( !m_headless )
     {
@@ -337,7 +337,7 @@ TomahawkApp::init()
     }
 
     // Set up echonest catalog synchronizer
-//     Tomahawk::EchonestCatalogSynchronizer::instance();
+    Tomahawk::EchonestCatalogSynchronizer::instance();
 
     PlaylistUpdaterInterface::registerUpdaterFactory( new XspfUpdaterFactory );
     PlaylistUpdaterInterface::registerUpdaterFactory( new SpotifyUpdaterFactory );
