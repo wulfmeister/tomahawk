@@ -19,15 +19,6 @@
 
 #include "RdioParser.h"
 
-#include <QDateTime>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QUrl>
-#include <QStringList>
-
-#include <QtCore/QCryptographicHash>
-
-#include <qjson/parser.h>
-
 #include "ShortenedLinkParser.h"
 #include "config.h"
 #include "DropJob.h"
@@ -40,6 +31,16 @@
 #include "utils/NetworkReply.h"
 #include "utils/TomahawkUtils.h"
 #include "utils/Logger.h"
+
+
+#include <qjson/parser.h>
+
+#include <QDateTime>
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QStringList>
+#include <QUrlQuery>
+#include <QCryptographicHash>
 
 using namespace Tomahawk;
 
@@ -254,42 +255,43 @@ QNetworkRequest
 RdioParser::generateRequest( const QString& method, const QString& url, const QList< QPair< QByteArray, QByteArray > >& extraParams, QByteArray* data )
 {
     QUrl fetchUrl( "http://api.rdio.com/1/" );
-//     QUrl toSignUrl = fetchUrl;
-//
-//     QPair<QByteArray, QByteArray> param;
-//     foreach ( param, extraParams )
-//     {
-//         toSignUrl.addEncodedQueryItem( param.first, param.second );
-//     }
-//     toSignUrl.addQueryItem( "method", method );
-//     toSignUrl.addEncodedQueryItem("oauth_consumer_key", "gk8zmyzj5xztt8aj48csaart" );
-//     QString nonce;
-//     for ( int i = 0; i < 8; i++ )
-//         nonce += QString::number( qrand() % 10 );
-//     toSignUrl.addQueryItem("oauth_nonce", nonce );
-//     toSignUrl.addEncodedQueryItem("oauth_signature_method", "HMAC-SHA1");
-//     toSignUrl.addQueryItem("oauth_timestamp", QString::number(QDateTime::currentMSecsSinceEpoch() / 1000 ) );
-//     toSignUrl.addEncodedQueryItem("oauth_version",  "1.0");
-//     toSignUrl.addEncodedQueryItem( "url", QUrl::toPercentEncoding( url ) );
-//     int size = toSignUrl.encodedQueryItems().size();
-//     for( int i = 0; i < size; i++ ) {
-//         const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
-//         data->append( item.first + "=" + item.second + "&" );
-//     }
-//     data->truncate( data->size() - 1 ); // remove extra &
-//
-//     QByteArray toSign = "POST&" + QUrl::toPercentEncoding( fetchUrl.toEncoded() ) + '&' + QUrl::toPercentEncoding( *data );
-//     qDebug() << "Rdio" << toSign;
-//
-//     toSignUrl.addEncodedQueryItem( "oauth_signature", QUrl::toPercentEncoding( hmacSha1("yt35kakDyW&", toSign ) ) );
-//
-//     data->clear();
-//     size = toSignUrl.encodedQueryItems().size();
-//     for( int i = 0; i < size; i++ ) {
-//         const QPair< QByteArray, QByteArray > item = toSignUrl.encodedQueryItems().at( i );
-//         data->append( item.first + "=" + item.second + "&" );
-//     }
-//     data->truncate( data->size() - 1 ); // remove extra &
+    QUrl toSignUrl = fetchUrl;
+    QUrlQuery toSignUrlQuery( toSignUrl );
+
+    QPair<QByteArray, QByteArray> param;
+    foreach ( param, extraParams )
+    {
+        toSignUrlQuery.addQueryItem( param.first, param.second );
+    }
+    toSignUrlQuery.addQueryItem( "method", method );
+    toSignUrlQuery.addQueryItem("oauth_consumer_key", "gk8zmyzj5xztt8aj48csaart" );
+    QString nonce;
+    for ( int i = 0; i < 8; i++ )
+        nonce += QString::number( qrand() % 10 );
+    toSignUrlQuery.addQueryItem("oauth_nonce", nonce );
+    toSignUrlQuery.addQueryItem("oauth_signature_method", "HMAC-SHA1");
+    toSignUrlQuery.addQueryItem("oauth_timestamp", QString::number(QDateTime::currentMSecsSinceEpoch() / 1000 ) );
+    toSignUrlQuery.addQueryItem("oauth_version",  "1.0");
+    toSignUrlQuery.addQueryItem( "url", QUrl::toPercentEncoding( url ) );
+    int size = toSignUrlQuery.queryItems().size();
+    for( int i = 0; i < size; i++ ) {
+        const QPair< QString, QString > item = toSignUrlQuery.queryItems().at( i );
+        data->append( item.first + "=" + item.second + "&" );
+    }
+    data->truncate( data->size() - 1 ); // remove extra &
+
+    QByteArray toSign = "POST&" + QUrl::toPercentEncoding( fetchUrl.toEncoded() ) + '&' + QUrl::toPercentEncoding( *data );
+    qDebug() << "Rdio" << toSign;
+
+    toSignUrlQuery.addQueryItem( "oauth_signature", QUrl::toPercentEncoding( hmacSha1("yt35kakDyW&", toSign ) ) );
+
+    data->clear();
+    size = toSignUrlQuery.queryItems().size();
+    for( int i = 0; i < size; i++ ) {
+        const QPair< QString, QString > item = toSignUrlQuery.queryItems().at( i );
+        data->append( item.first.toLatin1() + "=" + item.second.toLatin1() + "&" );
+    }
+    data->truncate( data->size() - 1 ); // remove extra &
 
     QNetworkRequest request = QNetworkRequest( fetchUrl );
     request.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
