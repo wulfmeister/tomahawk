@@ -20,11 +20,11 @@
 
 #include "DllMacro.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
-#include <QtCore/QSize>
-#include <QtGui/QColor>
-#include <QtGui/QPixmap>
+#include <QSize>
+#include <QColor>
+#include <QPixmap>
 #include <QPainter>
 #include <QAbstractItemView>
 
@@ -52,7 +52,7 @@ public:
     QSize sizeHint() const;
 
     QPixmap pixmap() const { return m_pixmap; }
-    
+
     void setAutoCenter( bool enabled ) { m_autoCenter = enabled; }
 
 public slots:
@@ -99,7 +99,7 @@ class LoadingSpinner : public AnimatedSpinner
 
 public:
     explicit LoadingSpinner( QAbstractItemView* parent = 0 ); // widget mode
-    
+
 private slots:
     void onViewModelChanged();
 

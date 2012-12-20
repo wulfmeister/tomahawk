@@ -193,7 +193,7 @@ set( libSources
     SourcePlaylistInterface.cpp
     PlaylistInterface.cpp
 
-    EchonestCatalogSynchronizer.cpp
+#     EchonestCatalogSynchronizer.cpp
 
     accounts/AccountManager.cpp
     accounts/Account.cpp

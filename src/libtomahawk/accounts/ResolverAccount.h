@@ -22,6 +22,8 @@
 #include "accounts/Account.h"
 #include "DllMacro.h"
 
+#include <QPointer>
+
 namespace Tomahawk {
 
 class ExternalResolverGui;
@@ -92,7 +94,7 @@ protected:
 
     void hookupResolver();
 
-    QWeakPointer<ExternalResolverGui> m_resolver;
+    QPointer<ExternalResolverGui> m_resolver;
 
 private:
     void init( const QString& path );
