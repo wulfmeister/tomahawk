@@ -154,8 +154,8 @@ INCLUDE(GNUInstallDirs)
 #                ${CMAKE_CURRENT_BINARY_DIR}/TomahawkVersion.h)
 
 # translations
-# include( ${CMAKE_SOURCE_DIR}/lang/translations.cmake )
-# add_tomahawk_translations(ar bg ca de en es fr ja pl pt_BR ru sv tr zh_CN zh_TW)
+include( ${CMAKE_SOURCE_DIR}/lang/translations.cmake )
+add_tomahawk_translations(ar bg ca de en es fr ja pl pt_BR ru sv tr zh_CN zh_TW)
 
 SET( final_src ${final_src} ${tomahawkMoc} ${tomahawkSources} ${trans_outfile})
 
